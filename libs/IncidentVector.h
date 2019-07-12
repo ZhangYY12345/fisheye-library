@@ -16,32 +16,33 @@
 
 #define PROJECTION_NUM 4
 
+//抽象类
 class IncidentVector
 {
 protected:
     static double f; // Focal length (pixel unit)
     static double f0; // Scale constant
-    static std::vector<double> a; // Distortion parameters (odd)
-    static std::vector<double> b; // Distortion parameters (even)
-    static cv::Point2d center; // Optical center
+    static std::vector<double> a; // Distortion parameters (odd)	？奇次幂系数？
+    static std::vector<double> b; // Distortion parameters (even)	？偶次幂系数
+    static cv::Point2d center; // Optical center (u_0, v_0):光学中心在图像物理坐标系中的坐标
     static cv::Size2i img_size; // Image size
     double theta;
     double r;
     static std::string projection_name[PROJECTION_NUM];
-    static int projection; //Projection Model
+    static int projection; //Projection Model：成像模型，所选用投影模型的标识
     cv::Point3d part;
 
     void calcCommonPart(); // Calculate common part of derivatives
-    virtual cv::Point3d calcDu() = 0;
+    virtual cv::Point3d calcDu() = 0;	//依据不同的成像模型，分别实现函数
     virtual cv::Point3d calcDv() = 0;
     virtual cv::Point3d calcDf() = 0;
     virtual std::vector<cv::Point3d> calcDak() = 0;
     
 public:
     cv::Point3d m;
-    cv::Point2d point;
+    cv::Point2d point;		//图像物理坐标
     std::vector<cv::Point3d> derivatives;
-    static int nparam; // Number of parameters (u0, v0, f, a1, a2, ...)
+    static int nparam; // Number of parameters (u0, v0, f, a1, a2, ...),相机内参
     
     IncidentVector(cv::Point2d p);
     
@@ -55,6 +56,7 @@ public:
         IncidentVector::a = a;
         IncidentVector::nparam = 3 + (int)a.size();
     }
+	//初始化相机参数：内参+畸变参数
     static void initA(int a_size) {
         std::vector<double> a(a_size, 0);
         IncidentVector::a = a;

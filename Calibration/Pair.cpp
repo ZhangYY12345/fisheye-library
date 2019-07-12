@@ -8,6 +8,7 @@
 
 #include "Pair.h"
 
+//对所有点（图像上的点，图像像素坐标）计算其在相机坐标系的坐标
 void Pair::calcM()
 {
     for (int i = 0; i < 2; ++i) {
@@ -19,10 +20,11 @@ void Pair::calcM()
     }
 }
 
+//对边缘edge中的每条线line上的每个点point，求导
 void Pair::calcMd()
 {
     for (int i = 0; i < 2; ++i) {
-        for(auto &line : edge[i]) {
+        for(auto &line : edge[i]) {	
             for (auto &point : line) {
                 point->calcDerivatives();
             }
@@ -30,6 +32,7 @@ void Pair::calcMd()
     }
 }
 
+//?
 void Pair::calcNormal()
 {
     for (int i = 0; i < 2; ++i) {
@@ -43,13 +46,14 @@ void Pair::calcNormal()
                 Mk += m * m.t();
             }
             cv::Mat eigenValues, eigenVectors;
-            cv::eigen(Mk, eigenValues, eigenVectors);
+            cv::eigen(Mk, eigenValues, eigenVectors);	//计算特征值和特征向量
             normalVector[i].push_back(eigenVectors);
             normalValue[i].push_back(eigenValues);
         }
     }
 }
 
+//?
 void Pair::calcLine()
 {
     for (int i = 0; i < 2; ++i) {
@@ -67,6 +71,7 @@ void Pair::calcLine()
     }
 }
 
+//?
 void Pair::calcMc()
 {
     for (int i = 0; i < 2; ++i) {
@@ -91,6 +96,7 @@ void Pair::calcMc()
     
 }
 
+//?
 void Pair::calcMcc()
 {
     for (int i = 0; i < 2; ++i) {

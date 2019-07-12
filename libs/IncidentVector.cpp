@@ -17,23 +17,26 @@ int IncidentVector::nparam = 3;
 std::string IncidentVector::projection_name[PROJECTION_NUM] = {"Stereographic", "Orthographic", "Equidistance", "EquisolidAngle"};
 int IncidentVector::projection;
 
+//标定角点在图像中的图像物理坐标
 IncidentVector::IncidentVector(cv::Point2d p)
 {
     point = p;
 }
 
-
+//设置相机内参，
 void IncidentVector::setParameters(double f, double f0, std::vector<double> a, cv::Size2i img_size, cv::Point2d center)
 {
     IncidentVector::f = f;
     IncidentVector::f0 = f0;
-    IncidentVector::a = a;
+    IncidentVector::a = a;		//相机畸变参数a_1,a_2,a_3,...
     IncidentVector::img_size = img_size;
     IncidentVector::center = center;
     
     nparam = 3 + (int)a.size();
 }
 
+//projection indicate the chosen projection model of the fisheye camera :
+//stereographic or orthographic or equidistance or equisolid_angle
 void IncidentVector::setProjection(std::string projection)
 {
     for (int i = 0; i < PROJECTION_NUM; ++i) {
@@ -45,9 +48,10 @@ void IncidentVector::setProjection(std::string projection)
     exit(4);
 }
 
+//calculate the coordinate(x_c,y_c,z_c) in camera coordinate system(Oc-XcYcZc)
 void IncidentVector::calcM()
 {
-    r = sqrt(pow(center.x-point.x, 2) + pow(center.y-point.y, 2));
+    r = sqrt(pow(center.x-point.x, 2) + pow(center.y-point.y, 2));	//r,是否考虑畸变？
     theta = aoi(r);
     if (r != 0) {
         m.x = ((point.x - center.x) / r) * sin(theta);
@@ -60,6 +64,7 @@ void IncidentVector::calcM()
     }
 }
 
+// 各坐标关于theta求导
 void IncidentVector::calcCommonPart()
 {
     if (r != 0) {
@@ -71,6 +76,7 @@ void IncidentVector::calcCommonPart()
     }
 }
 
+//？求导？
 void IncidentVector::calcDerivatives()
 {
     calcCommonPart();

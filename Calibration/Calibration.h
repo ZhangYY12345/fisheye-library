@@ -18,10 +18,10 @@
 //#include <Eigen/Core>
 #include <opencv2/opencv.hpp>
 #include "../libs/IncidentVector.h"
-#include "../libs/EquidistanceProjection.h"
-#include "../libs/EquisolidAngleProjection.h"
-#include "../libs/StereographicProjection.h"
-#include "../libs/OrthographicProjection.h"
+#include "../libs/EquidistanceProjection.h"			//等距投影
+#include "../libs/EquisolidAngleProjection.h"		//等立体角投影
+#include "../libs/StereographicProjection.h"		//体视投影
+#include "../libs/OrthographicProjection.h"			//正交投影
 #include "Pair.h"
 #include "../libs/tinyxml2.h"
 

@@ -30,7 +30,7 @@ void Calibration::loadData(std::string filename) {
     
     cv::Size2i img_size;
     cv::Point2d center;
-    img_size.width = atoi(root->FirstChildElement("width")->GetText());
+    img_size.width = atoi(root->FirstChildElement("width")->GetText());		//atoi()将字符串转换为整型数
     center.x = img_size.width / 2.0;
     img_size.height = atoi(root->FirstChildElement("height")->GetText());
     center.y = img_size.height / 2.0;
@@ -38,7 +38,7 @@ void Calibration::loadData(std::string filename) {
     IncidentVector::setCenter(center);
     
     std::string projection = root->FirstChildElement("projection")->GetText();
-    IncidentVector::setProjection(projection);
+    IncidentVector::setProjection(projection);	//选择设置相机的成像模型
     
     std::stringstream ssdata;
     tinyxml2::XMLElement *pair = root->FirstChildElement("pair");
@@ -46,7 +46,7 @@ void Calibration::loadData(std::string filename) {
     while (pair != NULL) {
         Pair tmp;
         
-        // edge1
+        // edge1？？
         tinyxml2::XMLElement *edge1 = pair->FirstChildElement("lines1");
         tinyxml2::XMLElement *line = edge1->FirstChildElement("line");
         while (line != NULL) {
@@ -78,7 +78,7 @@ void Calibration::loadData(std::string filename) {
             line = line->NextSiblingElement("line");
         }
         
-        // edge2
+        // edge2？？
         tinyxml2::XMLElement *edge2 = pair->FirstChildElement("lines2");
         line = edge2->FirstChildElement("line");
         while (line != NULL) {
