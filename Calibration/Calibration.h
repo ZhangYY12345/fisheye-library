@@ -45,13 +45,13 @@ public:
     
     
     //大文字の後に付いてるcは微分を表している
-    double J1(); // Colinearity
+    double J1(); // Colinearity:共线性约束
     double J1c(int);
     double J1cc(int, int);
-    double J2(); // Parallelism
+    double J2(); // Parallelism：平行性约束
     double J2c(int);
     double J2cc(int, int);
-    double J3(); // Orthogonality
+    double J3(); // Orthogonality：正交性约束
     double J3c(int);
     double J3cc(int, int);
 };

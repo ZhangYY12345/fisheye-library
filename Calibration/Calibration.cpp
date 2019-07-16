@@ -38,7 +38,7 @@ void Calibration::loadData(std::string filename) {
     IncidentVector::setCenter(center);
     
     std::string projection = root->FirstChildElement("projection")->GetText();
-    IncidentVector::setProjection(projection);	//选择设置相机的成像模型
+    IncidentVector::setProjection(projection);	//选择设置相机的成像模型：等距/体视/等立体角/正交投影
     
     std::stringstream ssdata;
     tinyxml2::XMLElement *pair = root->FirstChildElement("pair");
@@ -46,12 +46,15 @@ void Calibration::loadData(std::string filename) {
     while (pair != NULL) {
         Pair tmp;
         
-        // edge1？？
+        //xml文件中存储了图像上直线的坐标：以图像上点的形式存储
+		//lines1,lines2
+		//lines1中存有多个直线上点集的信息
+    	//-》lines1对应图像上直线点的坐标信息（带畸变的）？或者理想直线坐标信息？
         tinyxml2::XMLElement *edge1 = pair->FirstChildElement("lines1");
         tinyxml2::XMLElement *line = edge1->FirstChildElement("line");
         while (line != NULL) {
             std::vector<IncidentVector *> edge; // One line of points
-            tinyxml2::XMLElement *p = line->FirstChildElement("p");
+            tinyxml2::XMLElement *p = line->FirstChildElement("p");	//点坐标
             while (p != NULL) {
                 cv::Point2d point;
                 ssdata.str(p->GetText());
@@ -74,7 +77,7 @@ void Calibration::loadData(std::string filename) {
                 ssdata.clear();
                 p = p->NextSiblingElement("p");
             }
-            tmp.edge[0].push_back(edge);
+            tmp.edge[0].push_back(edge);//？理想直线的点集？实际图像上直线的点集？
             line = line->NextSiblingElement("line");
         }
         
@@ -106,7 +109,7 @@ void Calibration::loadData(std::string filename) {
                 ssdata.clear();
                 p = p->NextSiblingElement("p");
             }
-            tmp.edge[1].push_back(edge);
+            tmp.edge[1].push_back(edge);//？理想直线的点集？实际图像上直线的点集？
             line = line->NextSiblingElement("line");
         }
         
@@ -176,6 +179,8 @@ void Calibration::calibrate(bool divide)
         
         //    ( 2 ) 式(3) によって入射角θκα を計算し，式(6) によって入射光ベクトルmκα を計算し，
         //    式(7), (10), (13) によって∂mκα/∂c を計算する(c = u0, v0, f, a1, a2, ...)．
+
+		//根据式(3)计算入射角θ成为α，根据式(6)计算入射光矢量m成为α，
         for (auto &pair : edges) {
             pair.calcM();
             pair.calcNormal();
@@ -184,6 +189,8 @@ void Calibration::calibrate(bool divide)
         }
         
         //    ( 3 ) それらを用いてJ のパラメータに関する1 階微分Jc，2 階微分Jcc0 を計算する
+
+		//使用这些计算J参数的1层微分Jc，2层微分Jcc0
         cv::Mat left(IncidentVector::nparam, IncidentVector::nparam, CV_64F);
         cv::Mat right(IncidentVector::nparam, 1, CV_64F);
         
@@ -204,12 +211,14 @@ void Calibration::calibrate(bool divide)
                 cmat.at<double>(i,i) = 1+C;
             }
             //    ( 4 ) 次の連立1次方程式を解いてΔu0, Δv0, Δf, Δa1, ... を計算する．
+			//计算Δu0,Δv0,Δf,Δa1, ...：参数移动步长
             cv::solve(left.mul(cmat), -right, delta);
             std::cout << "------------------------ Iteration "<< iterations << " -------------------------" << std::endl;
             std::cout << "Delta: " << delta << std::endl;
             
             //    ( 5 ) 次のように˜u0, ˜v0, ˜ f, ˜a1, a2, ... を計算し，それに対するJ の値を˜ J とする．
             //    ˜u0 = u0+Δu0, ˜v = v0+Δv0, ˜ f = f+Δf, ˜a1 = a1+Δa1, ˜a2 = a2+Δa2, ... (48)
+			//新的参数，基于新的参数计算各约束条件：共线性约束，平行性约束，正交性约束
             cv::Point2d center_(center.x + delta.at<double>(0), center.y + delta.at<double>(1));
             double f_ = f + delta.at<double>(2);
             std::vector<double> a_;
@@ -239,6 +248,7 @@ void Calibration::calibrate(bool divide)
             
             
             //    ( 6 ) ˜ J < J0 なら次へ進む．そうでなければC Ã 10C としてステップ(4) に戻る．
+			//J < J0的话前进下一步; 否则作为C := 10*C 返回步骤(4)
             if ( J_  <= J0) {
                 std::cout << "Center:\t" << center_ << std::endl;
                 std::cout << "     f:\t" << f_ << std::endl;
@@ -255,6 +265,7 @@ void Calibration::calibrate(bool divide)
         //    ( 7 ) u0 Ã ˜u0, v0 Ã ˜v0, f Ã ˜ f, a1 Ã ˜a1, a2 Ã ˜a2, ... とし，jΔu0j < ²0, jΔv0j < ²0,
         //    jΔfj < ²f , jΔa1j < ²1, jΔa2j < ²2, ... ならu0, v0, f, a1, a2, ..., J を返して終了す
         //    る．そうでなければJ0 Ã J, C Ã C/10 としてステップ(2) に戻る
+		//若满足迭代终止条件，返回并退出；否则，。。。返回到步骤(2)，继续迭代
         bool converged = true;
         double epsilon = 1.0e-5;
         if (delta.at<double>(0) / center.x > epsilon ||
@@ -430,7 +441,8 @@ void Calibration::calibrate2()
     std::cout << "Calibration has been finished in " << minutes << " minutes " << seconds << " seconds" << std::endl;
 }
 
-
+// Colinearity:共线性约束:j1 = 0，由于畸变的存在j1 != 0 ->搜索使j1 == 0 的相机参数：内参，畸变参数求解
+														//->最小二乘问题->J1的一阶导，二阶导
 double Calibration::J1()
 {
     double j1 = 0;
@@ -446,6 +458,7 @@ double Calibration::J1()
     return j1;
 }
 
+//?
 double Calibration::J1c(int c)
 {
     double j1c = 0;
@@ -492,6 +505,8 @@ double Calibration::J1cc(int c1, int c2)
     return j1cc;
 }
 
+// Parallelism：平行性约束:j2 = 0，由于畸变的存在j2 != 0 ->搜索使j2 == 0 的相机参数：内参，畸变参数求解
+														//->最小二乘问题->J2的一阶导，二阶导
 double Calibration::J2()
 {
     double j2 = 0;
@@ -539,7 +554,8 @@ double Calibration::J2cc(int c1, int c2)
     return j2cc;
 }
 
-
+// Orthogonality：正交性约束:j3 = 0，由于畸变的存在j3 != 0 ->搜索使j3 == 0 的相机参数：内参，畸变参数求解
+														//->最小二乘问题->J3的一阶导，二阶导
 double Calibration::J3()
 {
     double j3 = 0;

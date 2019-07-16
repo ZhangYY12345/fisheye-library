@@ -43,12 +43,12 @@ void Pair::calcNormal()
             cv::Mat Mk = cv::Mat::zeros(3, 3, CV_64F);
             for (auto &point : line) {
                 cv::Mat m(point->m);
-                Mk += m * m.t();
+                Mk += m * m.t();	//海森矩阵，二阶导
             }
             cv::Mat eigenValues, eigenVectors;
-            cv::eigen(Mk, eigenValues, eigenVectors);	//计算特征值和特征向量
-            normalVector[i].push_back(eigenVectors);
-            normalValue[i].push_back(eigenValues);
+            cv::eigen(Mk, eigenValues, eigenVectors);	//计算 每条直线的特征值和特征向量？
+            normalVector[i].push_back(eigenVectors);	//特征向量
+            normalValue[i].push_back(eigenValues);		//特征值
         }
     }
 }
@@ -60,12 +60,12 @@ void Pair::calcLine()
         
         cv::Mat Ng = cv::Mat::zeros(3, 3, CV_64F);
         for (auto &n : normalVector[i]) {
-            cv::Mat nk = n.row(2);
+            cv::Mat nk = n.row(2); //？
             Ng += nk.t() * nk;
         }
         
         cv::Mat eigenValues, eigenVectors;
-        cv::eigen(Ng, eigenValues, eigenVectors);
+        cv::eigen(Ng, eigenValues, eigenVectors);	//计算 同一幅图上的所有直线的特征向量与特征值？
         lineVector[i] = eigenVectors;
         lineValue[i] = eigenValues;
     }
