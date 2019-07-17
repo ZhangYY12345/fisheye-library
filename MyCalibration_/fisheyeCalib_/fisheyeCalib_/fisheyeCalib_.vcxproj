@@ -117,24 +117,30 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="calib_libs\EquidistanceProjection.cpp" />
+    <ClCompile Include="calib_libs\EquisolidAngleProjection.cpp" />
+    <ClCompile Include="calib_libs\IncidentVector.cpp" />
+    <ClCompile Include="calib_libs\OrthographicProjection.cpp" />
+    <ClCompile Include="calib_libs\StereographicProjection.cpp" />
+    <ClCompile Include="calib_libs\tinyxml2.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="methods\methods_.cpp" />
-    <ClCompile Include="methods_libs\EquidistanceProjection.cpp" />
-    <ClCompile Include="methods_libs\EquisolidAngleProjection.cpp" />
-    <ClCompile Include="methods_libs\IncidentVector.cpp" />
-    <ClCompile Include="methods_libs\OrthographicProjection.cpp" />
-    <ClCompile Include="methods_libs\StereographicProjection.cpp" />
-    <ClCompile Include="methods_libs\tinyxml2.cpp" />
+    <ClCompile Include="methods\Calibration.cpp" />
+    <ClCompile Include="methods\LineDetection.cpp" />
+    <ClCompile Include="methods\Pair.cpp" />
+    <ClCompile Include="methods\Pattern.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="methods\methods_.h" />
+    <ClInclude Include="calib_libs\EquidistanceProjection.h" />
+    <ClInclude Include="calib_libs\EquisolidAngleProjection.h" />
+    <ClInclude Include="calib_libs\IncidentVector.h" />
+    <ClInclude Include="calib_libs\OrthographicProjection.h" />
+    <ClInclude Include="calib_libs\StereographicProjection.h" />
+    <ClInclude Include="calib_libs\tinyxml2.h" />
+    <ClInclude Include="methods\Calibration.h" />
+    <ClInclude Include="methods\LineDetection.h" />
+    <ClInclude Include="methods\Pair.h" />
     <ClInclude Include="methods\parameterCalib_.h" />
-    <ClInclude Include="methods_libs\EquidistanceProjection.h" />
-    <ClInclude Include="methods_libs\EquisolidAngleProjection.h" />
-    <ClInclude Include="methods_libs\IncidentVector.h" />
-    <ClInclude Include="methods_libs\OrthographicProjection.h" />
-    <ClInclude Include="methods_libs\StereographicProjection.h" />
-    <ClInclude Include="methods_libs\tinyxml2.h" />
+    <ClInclude Include="methods\Pattern.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

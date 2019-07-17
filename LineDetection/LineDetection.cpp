@@ -22,6 +22,9 @@ LineDetection::LineDetection()
 
 /*
  * Load filenames of images from XML files
+ * //一组标定图像的组成：水平直线：黑白相间水平直线条：黑白位置互换，构造两张图像
+ *						 垂直直线：黑白相间垂直直线条：黑白位置互换，构造两张图像
+ *						 -->共4张图像
  */
 void LineDetection::loadImageXML(std::string filename)
 {
