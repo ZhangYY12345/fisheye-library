@@ -57,6 +57,7 @@ public:
     void writeXML(std::string filename);
     std::vector<std::vector<cv::Point2i> > detectValley(cv::Mat &img1, cv::Mat &img2);
     std::vector<std::vector<cv::Point2i> > detectLines(cv::Mat &img1, cv::Mat &img2);
+	void removeNoisePts(std::vector<std::vector<cv::Point2i> >& lines, cv::Size imgSize, bool isHorizon = true);
 	void removeNoiseLine(std::vector<std::vector<cv::Point2i> >& lines, bool isHorizon = true);
     std::vector<std::vector<std::vector<cv::Point2i> > > loadEdgeXML(std::string filename);
     void editAllEdges(std::vector<std::vector<std::vector<cv::Point2i> > > edges);

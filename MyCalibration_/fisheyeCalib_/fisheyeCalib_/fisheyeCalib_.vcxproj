@@ -128,6 +128,7 @@
     <ClCompile Include="methods\LineDetection.cpp" />
     <ClCompile Include="methods\Pair.cpp" />
     <ClCompile Include="methods\Pattern.cpp" />
+    <ClCompile Include="methods\Reprojection.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="calib_libs\EquidistanceProjection.h" />
@@ -141,6 +142,7 @@
     <ClInclude Include="methods\Pair.h" />
     <ClInclude Include="methods\parameterCalib_.h" />
     <ClInclude Include="methods\Pattern.h" />
+    <ClInclude Include="methods\Reprojection.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

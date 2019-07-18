@@ -426,12 +426,14 @@ void LineDetection::processAllImages()
                 }
                 edges[0] = detectLines(img[0], img[1]);
 				removeNoiseLine(edges[0], false);
+				removeNoisePts(edges[0], img[0].size(), false);
 //                edges[0] = detectValley(img[0], img[1]);
-                //display(cv::Size2i(img[0].cols, img[0].rows), edges[0], "edges");
+                display(cv::Size2i(img[0].cols, img[0].rows), edges[0], "edges");
 //                edges[1] = detectValley(img[2], img[3]);
                 edges[1] = detectLines(img[2], img[3]);
 				removeNoiseLine(edges[1], true);
-                //display(cv::Size2i(img[2].cols, img[2].rows), edges[1], "edges");
+				removeNoisePts(edges[1], img[2].size(), true);
+                display(cv::Size2i(img[2].cols, img[2].rows), edges[1], "edges");
                 break;
                 
             case Two:
@@ -554,7 +556,7 @@ std::vector<std::vector<cv::Point2i> > LineDetection::detectLines(cv::Mat &img1,
     cv::Mat diff = img1-img2;
     cv::Mat cross = cv::Mat::zeros(diff.rows, diff.cols, CV_8UC1);
     cv::Mat cross_inv = cv::Mat::zeros(diff.rows, diff.cols, CV_8UC1);
-    double thresh = 20;
+	double thresh = 100;
     bool positive; // Whether previous found cross point was positive
     bool search; // Whether serching
     bool found_first;
@@ -694,6 +696,57 @@ std::vector<std::vector<cv::Point2i> > LineDetection::detectLines(cv::Mat &img1,
     return lines;
 }
 
+void LineDetection::removeNoisePts(std::vector<std::vector<cv::Point2i> >& lines, cv::Size imgSize, bool isHorizon)
+{
+	if (isHorizon)
+	{
+		for (int num = 0; num < lines.size(); num++)
+		{
+			cv::Mat mat = cv::Mat::zeros(1, imgSize.width, CV_8UC1);
+			for (int i = 0; i < lines[num].size(); i++)
+			{
+				mat.at<uchar>(0, lines[num][i].x)++;
+			}
+			cv::threshold(mat, mat, 2, 1, cv::THRESH_TOZERO_INV);
+
+			std::vector<cv::Point2i> lineTemp;
+			for (int i = 0; i < lines[num].size(); i++)
+			{
+				if (mat.at<uchar>(0, lines[num][i].x) != 0)
+				{
+					lineTemp.push_back(lines[num][i]);
+				}
+			}
+			lines[num].clear();
+			lines[num].assign(lineTemp.begin(), lineTemp.end());
+		}
+
+	}
+	else
+	{
+		for (int num = 0; num < lines.size(); num++)
+		{
+			cv::Mat mat = cv::Mat::zeros(1, imgSize.height, CV_8UC1);
+			for (int i = 0; i < lines[num].size(); i++)
+			{
+				mat.at<uchar>(0, lines[num][i].y)++;
+			}
+			cv::threshold(mat, mat, 2, 1, cv::THRESH_TOZERO_INV);
+
+			std::vector<cv::Point2i> lineTemp;
+			for(int i = 0; i< lines[num].size(); i++)
+			{
+				if(mat.at<uchar>(0, lines[num][i].y) != 0)
+				{
+					lineTemp.push_back(lines[num][i]);
+				}
+			}
+			lines[num].clear();
+			lines[num].assign(lineTemp.begin(), lineTemp.end());
+		}
+	}
+}
+
 void LineDetection::removeNoiseLine(std::vector<std::vector<cv::Point2i>>& lines, bool isHorizon)
 {
 	if (isHorizon)
@@ -705,6 +758,7 @@ void LineDetection::removeNoiseLine(std::vector<std::vector<cv::Point2i>>& lines
 				--i;
 			}
 		}
+
 	}
 	else
 	{

@@ -26,9 +26,9 @@ int main(int argc, const char * argv[])
     Reprojection reproj;
     double f_;
 
-    std::string param;
-    std::cout << "Type parameter file name > ";
-    std::cin >> param;
+    std::string param = "resCalib.xml";
+    //std::cout << "Type parameter file name > ";
+    //std::cin >> param;
     reproj.loadPrameters(param);
     
     // Print parameters
@@ -45,9 +45,9 @@ int main(int argc, const char * argv[])
     reproj.theta2radius();
 //    reproj.saveRadius2Theta("Stereographic.dat");
     
-    std::string srcname;
-    std::cout << "Type source image file name > ";
-    std::cin >> srcname;
+    std::string srcname = "9_pattern2.jpg";
+    //std::cout << "Type source image file name > ";
+    //std::cin >> srcname;
     cv::Mat src = cv::imread(srcname);
     cv::Mat mapx;
     cv::Mat mapy;
@@ -67,7 +67,7 @@ int main(int argc, const char * argv[])
     reproj.calcMaps(theta_x, theta_y, f_, mapx, mapy);
     
     cv::Mat dst;
-    cv::remap(src, dst, mapx, mapy, cv::INTER_LINEAR); // Rectify
+    cv::remap(src, dst, mapx, mapy, cv::INTER_LINEAR, cv::BORDER_TRANSPARENT); // Rectify
     cv::namedWindow("src", CV_GUI_NORMAL);
     cv::imshow("src", src);
     cv::moveWindow("src", 0, 0);

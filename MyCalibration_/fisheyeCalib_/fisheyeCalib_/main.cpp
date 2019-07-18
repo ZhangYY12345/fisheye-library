@@ -17,24 +17,28 @@
 
 int main(int argc, const char * argv[])
 {
-	//////detect lines in calibration images
-	////std::string fname = "D:\\studying\\stereo vision\\research code\\fisheye-stereo-calibrate\\fisheye-library\\MyCalibration_\\fisheyeCalib_\\fisheyeCalib_\\patterns.xml";
-	////LineDetection ld;
-	//////    ld.editAllEdges(ld.loadEdgeXML(fname));
+	/****************************************
+	***detect lines in calibration images
+	****************************************/
+	std::string fname = "D:\\studying\\stereo vision\\research code\\fisheye-stereo-calibrate\\fisheye-library\\MyCalibration_\\fisheyeCalib_\\fisheyeCalib_\\patterns.xml";
+	LineDetection ld;
+	//    ld.editAllEdges(ld.loadEdgeXML(fname));
 
-	//////    std::vector<std::vector<std::vector<cv::Point2i> > > edges = ld.loadEdgeXML(fname);
-	//////    ld.saveParameters();
-	//////    ld.editAllEdges(edges);
-	////ld.loadImageXML(fname);
-	////ld.saveParameters();
+	//    std::vector<std::vector<std::vector<cv::Point2i> > > edges = ld.loadEdgeXML(fname);
+	//    ld.saveParameters();
+	//    ld.editAllEdges(edges);
+	ld.loadImageXML(fname);
+	ld.saveParameters();
 
-	////ld.processAllImages();
-	//////
-	////std::string output = "linesDetected.xml";
-	////ld.writeXML(output);
+	ld.processAllImages();
+	//
+	std::string output = "linesDetected.xml";
+	ld.writeXML(output);
 
 
-	//calibration with pre-detected lines
+	/****************************************
+	***calibration with pre-detected lines
+	****************************************/
 	Calibration calib;
 	std::string filename = "linesDetected.xml";
 	calib.loadData(filename);
@@ -122,8 +126,55 @@ int main(int argc, const char * argv[])
 	//    calib.calibrate(true);
 	//    calib.save(std::string("d_")+outname);
 
-
 	std::cout << "END" << std::endl;
+
+
+	/****************************************
+	***reprojection and get the rectified images
+	****************************************/
+	Reprojection reproj;
+	double f_;
+
+	std::string param = "resCalib.xml";
+	//std::cout << "Type parameter file name > ";
+	//std::cin >> param;
+	reproj.loadPrameters(param);
+
+	// Print parameters
+	std::cout << "f: " << IncidentVector::getF() << "\nf0: " << IncidentVector::getF0() << std::endl;
+	std::cout << "center: " << IncidentVector::getCenter() << std::endl;
+	std::cout << "image size: " << IncidentVector::getImgSize() << std::endl;
+	std::cout << "ai: ";
+	std::vector<double> a_s = IncidentVector::getA();
+	for (std::vector<double>::iterator it = a_s.begin(); it != a_s.end(); it++) {
+		std::cout << *it << '\t';
+	}
+	std::cout << std::endl;
+
+	reproj.theta2radius();
+	//    reproj.saveRadius2Theta("Stereographic.dat");
+
+	std::string srcname = "9_pattern2.jpg";
+	//std::cout << "Type source image file name > ";
+	//std::cin >> srcname;
+	cv::Mat src = cv::imread(srcname);
+	cv::Mat mapx;
+	cv::Mat mapy;
+
+	f_ = IncidentVector::getF();
+	reproj.calcMaps(f_, mapx, mapy);
+
+	cv::Mat dst;
+	cv::remap(src, dst, mapx, mapy, cv::INTER_LINEAR, cv::BORDER_TRANSPARENT); // Rectify
+	cv::namedWindow("src", cv::WINDOW_GUI_NORMAL);
+	cv::imshow("src", src);
+	cv::moveWindow("src", 0, 0);
+	cv::namedWindow("dst", cv::WINDOW_GUI_NORMAL);
+	cv::imshow("dst", dst);
+	cv::moveWindow("dst", 0, 0);
+	//cv::waitKey();
+	cv::imwrite("out.png", dst);
+
 	return 0;
 }
 
@@ -131,7 +182,7 @@ int main(int argc, const char * argv[])
 //int main()
 //{
 //	cv::VideoCapture cap(1);
-//	int count = 4;
+//	int count = 0;
 //	bool flag0 = false, flag1 = false, flag2 = false, flag3 = false;
 //
 //	if (cap.isOpened())

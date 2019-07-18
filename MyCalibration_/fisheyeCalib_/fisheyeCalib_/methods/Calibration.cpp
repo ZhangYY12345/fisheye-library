@@ -338,6 +338,8 @@ void Calibration::calibrate2()
             
             //    ( 2 ) 式(3) によって入射角θκα を計算し，式(6) によって入射光ベクトルmκα を計算し，
             //    式(7), (10), (13) によって∂mκα/∂c を計算する(c = u0, v0, f, a1, a2, ...)．
+
+			//根据式(3)计算入射角θ成为α，根据式(6)计算入射光矢量m成为α，
             for (auto &pair : edges) {
                 pair.calcM();
                 pair.calcNormal();
