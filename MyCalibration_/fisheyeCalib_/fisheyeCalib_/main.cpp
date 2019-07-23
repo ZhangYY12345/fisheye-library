@@ -14,167 +14,167 @@
 #include <fstream>
 #include <sstream>
 #include <opencv2/opencv.hpp>
-
+#include "methods/method_.h"
+#include <valarray>
+//#include <pthread.h>
 int main(int argc, const char * argv[])
 {
-	/****************************************
-	***detect lines in calibration images
-	****************************************/
-	std::string fname = "D:\\studying\\stereo vision\\research code\\fisheye-stereo-calibrate\\fisheye-library\\MyCalibration_\\fisheyeCalib_\\fisheyeCalib_\\patterns.xml";
-	LineDetection ld;
-	//    ld.editAllEdges(ld.loadEdgeXML(fname));
+	//single fisheye camera calibration
+	fisheyeCalibInfo calibInfoL, calibInfoR;
+	calibInfoL.calibPatternFile = "patternsL.xml";
+	calibInfoL.calibLineDetected = "linesDetectedL.xml";
+	calibInfoL.calibFile = "resCalibL.xml";
+	fisheyeCalib_(calibInfoL);
 
-	//    std::vector<std::vector<std::vector<cv::Point2i> > > edges = ld.loadEdgeXML(fname);
-	//    ld.saveParameters();
-	//    ld.editAllEdges(edges);
-	ld.loadImageXML(fname);
-	ld.saveParameters();
+	calibInfoR.calibPatternFile = "patternsR.xml";
+	calibInfoR.calibLineDetected = "linesDetectedR.xml";
+	calibInfoR.calibFile = "resCalibR.xml";
+	fisheyeCalib_(calibInfoR);
 
-	ld.processAllImages();
-	//
-	std::string output = "linesDetected.xml";
-	ld.writeXML(output);
+	//stereo calibration based on unditort images
+	//std::string imgPath = "C:\\Users\\lenovo\\Web\\CaptureFiles\\2019-07-23";
+	std::string imgPath = "D:\\studying\\stereo vision\\research code\\data\\2019-07-23";
 
+	//load all the images in the folder
+	cv::String filePath = imgPath + "\\*L.jpg";
+	std::vector<cv::String> fileNames;
+	cv::glob(filePath, fileNames, false);
 
-	/****************************************
-	***calibration with pre-detected lines
-	****************************************/
-	Calibration calib;
-	std::string filename = "linesDetected.xml";
-	calib.loadData(filename);
-	int a_size = 3;
-	IncidentVector::initA(a_size);
-	//    std::vector<double> a;
-	//    a.push_back(5e-3); a.push_back( 6e-4); a.push_back( 7e-5); a.push_back( 8e-6); a.push_back( 9e-7);
-	//    a_size = 5;
-	//    IncidentVector::setA(a);
-	//    int x = atoi(argv[2]), y = atoi(argv[3]), f = atoi(argv[4]);
-	//    double x = 953., y = 600., f = 401.;
-	//    IncidentVector::setF(f);
-	//    IncidentVector::setCenter(cv::Point2d(793,606));
-	//    IncidentVector::setF0((int)f);
-
-	std::cout << "Projection Model:\t" << IncidentVector::getProjectionName() << std::endl;
-	std::cout << "Center:\t" << IncidentVector::getCenter() << std::endl;
-	std::cout << "     f:\t" << IncidentVector::getF() << std::endl;
-	for (int i = 0; i < IncidentVector::nparam - 3; ++i) {
-		std::cout << "    a" << i << ":\t" << IncidentVector::getA().at(i) << std::endl;
-	}
-
-	std::cout << "Orthogonal pairs: " << calib.edges.size() << std::endl;
-	long lines = 0;
-	long points = 0;
-	for (auto &pair : calib.edges) {
-		lines += pair.edge[0].size() + pair.edge[1].size();
-		for (auto &line : pair.edge[0]) {
-			points += line.size();
-		}
-		for (auto &line : pair.edge[1]) {
-			points += line.size();
-		}
-	}
-	std::cout << "Lines: " << lines << std::endl;
-	std::cout << "Points: " << points << std::endl;
-
-
-	// Show an image of all edges
-//    cv::Mat img = cv::Mat::zeros(IncidentVector::getImgSize().height, IncidentVector::getImgSize().width, CV_8UC3);
-//    cv::Vec3b color[30] = {cv::Vec3b(255,255,255), cv::Vec3b(255,0,0), cv::Vec3b(255,255,0), cv::Vec3b(0,255,0), cv::Vec3b(0,0,255),
-//        cv::Vec3b(255,0,255), cv::Vec3b(204,51,51), cv::Vec3b(204,204,51), cv::Vec3b(51,204,51), cv::Vec3b(51,204,204),
-//        cv::Vec3b(51,51,204), cv::Vec3b(204,51,204), cv::Vec3b(204,204,204), cv::Vec3b(153,102,102), cv::Vec3b(153,153,102),
-//        cv::Vec3b(102,153,102), cv::Vec3b(102,153,153), cv::Vec3b(102,102,153), cv::Vec3b(153,102,153), cv::Vec3b(153,153,153),
-//        cv::Vec3b(51,51,204), cv::Vec3b(204,51,204), cv::Vec3b(204,204,204), cv::Vec3b(153,102,102), cv::Vec3b(153,153,102),
-//        cv::Vec3b(102,153,102), cv::Vec3b(102,153,153), cv::Vec3b(102,102,153), cv::Vec3b(153,102,153), cv::Vec3b(153,153,153),
-//    };
-//    cv::namedWindow("lines", CV_WINDOW_NORMAL);
-//    int j = 0;
-//    for (auto &pair : calib.edges) {
-//        for (int i = 0; i < 2; ++i) {
-//            for (auto &line : pair.edge[i]) {
-//                for (auto &point : line) {
-//                    img.at<cv::Vec3b>(int(point->point.y), int(point->point.x)) = color[j%30];
-//                }
-//            }
-//        }
-//        cv::imshow("lines", img);
-//        cv::waitKey();
-//        ++j;
-//    }
-//        cv::imshow("edges", img);
-//        cv::waitKey();
-//        img = cv::Mat::zeros(IncidentVector::getImgSize().height, IncidentVector::getImgSize().width, CV_8UC1);
-//    cv::imwrite("lines.png", img);
-
-//    if (std::string(argv[7]) == std::string("divide")) {
-//        calib.calibrate(true);
-//    } else {
-//        calib.calibrate(false);
-//    }
-
-//    IncidentVector::initA(0);
-//    calib.calibrate(false);
-//    IncidentVector::initA(1);
-//    calib.calibrate(false);
-	IncidentVector::initA(a_size);
-	calib.calibrate(false);
-	//    calib.calibrate(true);
-	//    calib.calibrate2();
-
-	std::string outname = "resCalib.xml";
-	calib.save(outname);
-
-	//    calib.calibrate(true);
-	//    calib.save(std::string("d_")+outname);
-
-	std::cout << "END" << std::endl;
-
+	cv::Mat distImgL_, distImgR_;
+	distImgL_ = cv::imread(fileNames[0]);
+	distImgR_ = cv::imread(fileNames[0].substr(0, fileNames[0].length() - 5) + "R.jpg");
 
 	/****************************************
 	***reprojection and get the rectified images
 	****************************************/
-	Reprojection reproj;
-	double f_;
 
-	std::string param = "resCalib.xml";
-	//std::cout << "Type parameter file name > ";
-	//std::cin >> param;
-	reproj.loadPrameters(param);
+	calibInfo infoCalib;
+	infoCalib.calibFileL = "resCalibL.xml";
+	infoCalib.calibFileR = "resCalibR.xml";
+	infoCalib.calibChessImgPathL = "D:\\studying\\stereo vision\\research code\\data\\2019-07-23\\left";
+	infoCalib.calibChessImgPathR = "D:\\studying\\stereo vision\\research code\\data\\2019-07-23\\right";
+	infoCalib.chessRowNum = 6;
+	infoCalib.chessColNum = 9;
+	infoCalib.stereoCalib = "unditortStereoCalib.xml";
+	rectify_(infoCalib);
 
-	// Print parameters
-	std::cout << "f: " << IncidentVector::getF() << "\nf0: " << IncidentVector::getF0() << std::endl;
-	std::cout << "center: " << IncidentVector::getCenter() << std::endl;
-	std::cout << "image size: " << IncidentVector::getImgSize() << std::endl;
-	std::cout << "ai: ";
-	std::vector<double> a_s = IncidentVector::getA();
-	for (std::vector<double>::iterator it = a_s.begin(); it != a_s.end(); it++) {
-		std::cout << *it << '\t';
+	cv::Mat mapxL, mapyL, mapxR, mapyR;
+	cv::Mat lmapx, lmapy, rmapx, rmapy;
+	cv::Size imgSize;
+
+	//cv::FileStorage fn(infoCalib.stereoCalib, cv::FileStorage::READ);
+	//fn["Fisheye_Undistort_Map_mapxL"] >> mapxL;
+	//fn["Fisheye_Undistort_Map_mapyL"] >> mapyL;
+	//fn["Fisheye_Undistort_Map_mapxR"] >> mapxR;
+	//fn["Fisheye_Undistort_Map_mapyR"] >> mapyR;
+	//fn["ImgSize"] >> imgSize;
+	//fn["Stereo_Rectify_Map_mapxL"] >> lmapx;
+	//fn["Stereo_Rectify_Map_mapyL"] >> lmapy;
+	//fn["Stereo_Rectify_Map_mapxR"] >> rmapx;
+	//fn["Stereo_Rectify_Map_mapyR"] >> rmapy;
+	//fn.release();
+
+	cv::FileStorage fn_1("mapxL.xml", cv::FileStorage::READ);
+	fn_1["Fisheye_Undistort_Map_mapxL"] >> mapxL;
+	fn_1.release();
+
+	cv::FileStorage fn_2("mapyL.xml", cv::FileStorage::READ);
+	fn_2["Fisheye_Undistort_Map_mapyL"] >> mapxL;
+	fn_2.release();
+
+	cv::FileStorage fn_3("mapxR.xml", cv::FileStorage::READ);
+	fn_3["Fisheye_Undistort_Map_mapxR"] >> mapxL;
+	fn_3.release();
+
+	cv::FileStorage fn_4("mapyR.xml", cv::FileStorage::READ);
+	fn_4["Fisheye_Undistort_Map_mapyR"] >> mapxL;
+	fn_4.release();
+
+	cv::FileStorage fn_5("lmapx.xml", cv::FileStorage::READ);
+	fn_5["Stereo_Rectify_Map_mapxL"] >> lmapx;
+	fn_5.release();
+
+	cv::FileStorage fn_6("lmapy.xml", cv::FileStorage::READ);
+	fn_6["Stereo_Rectify_Map_mapyL"] >> lmapy;
+	fn_6.release();
+
+	cv::FileStorage fn_7("rmapx.xml", cv::FileStorage::READ);
+	fn_7["Stereo_Rectify_Map_mapxR"] >> rmapx;
+	fn_7.release();
+
+	cv::FileStorage fn_8("rmapy.xml", cv::FileStorage::READ);
+	fn_8["Stereo_Rectify_Map_mapyR"] >> rmapy;
+	fn_8.release();
+
+
+	//cv::imwrite("Fisheye_Undistort_Map_mapxL.jpg", mapxL);
+	//cv::imwrite("Fisheye_Undistort_Map_mapyL.jpg", mapyL);
+	//cv::imwrite("Fisheye_Undistort_Map_mapxR.jpg", mapxR);
+	//cv::imwrite("Fisheye_Undistort_Map_mapyR.jpg", mapyR);
+	//cv::imwrite("Stereo_Rectify_Map_mapxL.jpg", lmapx);
+	//cv::imwrite("Stereo_Rectify_Map_mapyL.jpg", lmapy);
+	//cv::imwrite("Stereo_Rectify_Map_mapxR.jpg", rmapx);
+	//cv::imwrite("Stereo_Rectify_Map_mapyR.jpg", rmapy);
+
+
+	//mapxL=cv::imread("Fisheye_Undistort_Map_mapxL.jpg");
+	//mapyL=cv::imread("Fisheye_Undistort_Map_mapyL.jpg");
+	//mapxR=cv::imread("Fisheye_Undistort_Map_mapxR.jpg");
+	//mapyR=cv::imread("Fisheye_Undistort_Map_mapyR.jpg");
+	//lmapx=cv::imread("Stereo_Rectify_Map_mapxL.jpg");
+	//lmapy=cv::imread("Stereo_Rectify_Map_mapyL.jpg");
+	//rmapx=cv::imread("Stereo_Rectify_Map_mapxR.jpg");
+	//rmapy=cv::imread("Stereo_Rectify_Map_mapyR.jpg");
+
+	//mapxL.convertTo(mapxL, CV_32FC1);
+	//mapyL.convertTo(mapyL, CV_32FC1);
+	//mapxR.convertTo(mapxR, CV_32FC1);
+	//mapyR.convertTo(mapyR, CV_32FC1);
+	//lmapx.convertTo(lmapx, CV_32FC1);
+	//lmapy.convertTo(lmapy, CV_32FC1);
+	//rmapx.convertTo(rmapx, CV_32FC1);
+	//rmapy.convertTo(rmapy, CV_32FC1);
+
+
+	for (int i = 0; i < fileNames.size(); i++)
+	{
+		cv::Mat distImgL, distImgR;
+		distImgL = cv::imread(fileNames[i]);
+		distImgR = cv::imread(fileNames[i].substr(0, fileNames[i].length() - 5) + "R.jpg");
+
+		cv::Mat undistImgL, undistImgR;
+		if (distImgL.size() != imgSize)
+		{
+			resize(distImgL, distImgL, imgSize);
+		}
+		if (distImgR.size() != imgSize)
+		{
+			resize(distImgR, distImgR, imgSize);
+		}
+		remap(distImgL, undistImgL, mapxL, mapyL, cv::INTER_LINEAR, cv::BORDER_TRANSPARENT);
+		remap(distImgR, undistImgR, mapxR, mapyR, cv::INTER_LINEAR, cv::BORDER_TRANSPARENT);
+
+		cv::Mat rectiLeft, rectiRight;
+		cv::remap(undistImgL, rectiLeft, lmapx, lmapy, cv::INTER_LINEAR);
+		cv::remap(undistImgR, rectiRight, rmapx, rmapy, cv::INTER_LINEAR);
+
+		cv::imwrite(fileNames[i].substr(0, fileNames[i].length() - 5) + "L_rectify.jpg", rectiLeft);
+		cv::imwrite(fileNames[i].substr(0, fileNames[i].length() - 5) + "R_rectify.jpg", rectiRight);
+
+		for (int ii = 0; ii < rectiLeft.rows; ii += 100)
+		{
+			cv::line(undistImgL, cv::Point(0, ii), cv::Point(rectiLeft.cols, ii), cv::Scalar(0, 255, 0));
+			cv::line(undistImgR, cv::Point(0, ii), cv::Point(rectiLeft.cols, ii), cv::Scalar(0, 255, 0));
+
+			cv::line(rectiLeft, cv::Point(0, ii), cv::Point(rectiLeft.cols, ii), cv::Scalar(0, 255, 0));
+			cv::line(rectiRight, cv::Point(0, ii), cv::Point(rectiLeft.cols, ii), cv::Scalar(0, 255, 0));
+		}
+
+
+		cv::Mat rectification;
+		merge4(undistImgL, undistImgR, rectiLeft, rectiRight, rectification);
+		cv::imwrite(fileNames[i].substr(0, fileNames[i].length() - 5) + "_rectifyMerge.jpg", rectification);
 	}
-	std::cout << std::endl;
-
-	reproj.theta2radius();
-	//    reproj.saveRadius2Theta("Stereographic.dat");
-
-	std::string srcname = "9_pattern2.jpg";
-	//std::cout << "Type source image file name > ";
-	//std::cin >> srcname;
-	cv::Mat src = cv::imread(srcname);
-	cv::Mat mapx;
-	cv::Mat mapy;
-
-	f_ = IncidentVector::getF();
-	reproj.calcMaps(f_, mapx, mapy);
-
-	cv::Mat dst;
-	cv::remap(src, dst, mapx, mapy, cv::INTER_LINEAR, cv::BORDER_TRANSPARENT); // Rectify
-	cv::namedWindow("src", cv::WINDOW_GUI_NORMAL);
-	cv::imshow("src", src);
-	cv::moveWindow("src", 0, 0);
-	cv::namedWindow("dst", cv::WINDOW_GUI_NORMAL);
-	cv::imshow("dst", dst);
-	cv::moveWindow("dst", 0, 0);
-	//cv::waitKey();
-	cv::imwrite("out.png", dst);
-
 	return 0;
 }
 

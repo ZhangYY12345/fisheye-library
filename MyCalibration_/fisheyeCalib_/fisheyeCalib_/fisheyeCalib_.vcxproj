@@ -126,6 +126,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="methods\Calibration.cpp" />
     <ClCompile Include="methods\LineDetection.cpp" />
+    <ClCompile Include="methods\method_.cpp" />
     <ClCompile Include="methods\Pair.cpp" />
     <ClCompile Include="methods\Pattern.cpp" />
     <ClCompile Include="methods\Reprojection.cpp" />
@@ -139,6 +140,7 @@
     <ClInclude Include="calib_libs\tinyxml2.h" />
     <ClInclude Include="methods\Calibration.h" />
     <ClInclude Include="methods\LineDetection.h" />
+    <ClInclude Include="methods\method_.h" />
     <ClInclude Include="methods\Pair.h" />
     <ClInclude Include="methods\parameterCalib_.h" />
     <ClInclude Include="methods\Pattern.h" />

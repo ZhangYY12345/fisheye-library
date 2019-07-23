@@ -57,6 +57,9 @@
     <ClCompile Include="methods\Reprojection.cpp">
       <Filter>源文件\methods</Filter>
     </ClCompile>
+    <ClCompile Include="methods\method_.cpp">
+      <Filter>源文件\methods</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="methods\parameterCalib_.h">
@@ -93,6 +96,9 @@
       <Filter>源文件\calib_libs</Filter>
     </ClInclude>
     <ClInclude Include="methods\Reprojection.h">
+      <Filter>源文件\methods</Filter>
+    </ClInclude>
+    <ClInclude Include="methods\method_.h">
       <Filter>源文件\methods</Filter>
     </ClInclude>
   </ItemGroup>

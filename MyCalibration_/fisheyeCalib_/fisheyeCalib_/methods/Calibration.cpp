@@ -169,7 +169,11 @@ void Calibration::calibrate(bool divide)
     std::cout << "J1  \t" << j1/gamma[0] << "\nJ2  \t" << j2/gamma[1] << "\nJ3  \t" << j3/gamma[2] << std::endl;
     std::cout << "J1  \t" << j1 << "\nJ2  \t" << j2 << "\nJ3  \t" << j3 << std::endl;
     std::cout << "======================================" << std::endl;
-    
+	//J0 = j2 / gamma[1] + j3 / gamma[2];
+	//std::cout << "\nJ2  \t" << j2 / gamma[1] << "\nJ3  \t" << j3 / gamma[2] << std::endl;
+	//std::cout << "\nJ2  \t" << j2 << "\nJ3  \t" << j3 << std::endl;
+	//std::cout << "======================================" << std::endl;
+
     int iterations = 0;
     cv::Mat delta_prev= cv::Mat::ones(IncidentVector::nparam, 1, CV_64F);
     while (true) {
@@ -198,8 +202,11 @@ void Calibration::calibrate(bool divide)
             for (int j = 0; j < IncidentVector::nparam; ++j) {
                 // (1+C) isn't calculated here, look at the next while loop
                 left.at<double>(i, j) = J1cc(i, j) / gamma[0] + J2cc(i, j) / gamma[1] + J3cc(i, j) / gamma[2];
+				//left.at<double>(i, j) =J2cc(i, j) / gamma[1] + J3cc(i, j) / gamma[2];
             }
                 right.at<double>(i) = J1c(i) / gamma[0] + J2c(i) / gamma[1] + J3c(i) / gamma[2];
+				//right.at<double>(i) = J2c(i) / gamma[1] + J3c(i) / gamma[2];
+
         }
         
         cv::Mat delta;
@@ -240,12 +247,15 @@ void Calibration::calibrate(bool divide)
             j2 = J2();
             j3 = J3();
             J_ =  j1 / gamma[0] + j2 / gamma[1] + j3 / gamma[2];
+			//J_ = j2 / gamma[1] + j3 / gamma[2];
             std::cout << "C: " << C << "\tJ0: " << J0 << "\tJ_: " << J_;
             std::cout.precision(10);
             std::cout.width(10);
             std::cout << "\tJ1_: " << j1/gamma[0] << "\tJ2_: " << j2/gamma[1] << "\tJ3_: " << j3/gamma[2] << std::endl;
             std::cout << "J1_: " << j1 << "\tJ2_: " << j2 << "\tJ3_: " << j3 << std::endl;
-            
+			//std::cout << "\tJ2_: " << j2 / gamma[1] << "\tJ3_: " << j3 / gamma[2] << std::endl;
+			//std::cout << "\tJ2_: " << j2 << "\tJ3_: " << j3 << std::endl;
+
             
             //    ( 6 ) ˜ J < J0 なら次へ進む．そうでなければC Ã 10C としてステップ(4) に戻る．
 			//J < J0的话前进下一步; 否则作为C := 10*C 返回步骤(4)
@@ -448,11 +458,14 @@ void Calibration::calibrate2()
 double Calibration::J1()
 {
     double j1 = 0;
-    
+
+	//int jj = 0;
     for (auto &pair : edges) {
+		//jj++;
         for (int i = 0; i < 2; ++i) {
             for (auto &nval : pair.normalValue[i]) {
                 j1 += nval.at<double>(2);
+				//std::cout << jj << "\t" << i << "\t" << nval.at<double>(2) << std::endl;
             }
         }
     }

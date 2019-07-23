@@ -424,16 +424,16 @@ void LineDetection::processAllImages()
 //                    img[i].convertTo(tmp, CV_64F);
 //                    cv::resize(tmp, img[i], cv::Size(), unit, unit, cv::INTER_CUBIC);
                 }
-                edges[0] = detectLines(img[0], img[1]);
+                edges[0] = detectLines(img[0], img[1], false);
 				removeNoiseLine(edges[0], false);
 				removeNoisePts(edges[0], img[0].size(), false);
-//                edges[0] = detectValley(img[0], img[1]);
-                display(cv::Size2i(img[0].cols, img[0].rows), edges[0], "edges");
-//                edges[1] = detectValley(img[2], img[3]);
-                edges[1] = detectLines(img[2], img[3]);
+                //edges[0] = detectValley(img[0], img[1]);
+                //display(cv::Size2i(img[0].cols, img[0].rows), edges[0], "edges");
+                //edges[1] = detectValley(img[2], img[3]);
+                edges[1] = detectLines(img[2], img[3], true);
 				removeNoiseLine(edges[1], true);
 				removeNoisePts(edges[1], img[2].size(), true);
-                display(cv::Size2i(img[2].cols, img[2].rows), edges[1], "edges");
+                //display(cv::Size2i(img[2].cols, img[2].rows), edges[1], "edges");
                 break;
                 
             case Two:
@@ -537,7 +537,7 @@ void LineDetection::writeXML(std::string filename)
     output.SaveFile(filename.c_str());
 }
 
-std::vector<std::vector<cv::Point2i> > LineDetection::detectLines(cv::Mat &img1, cv::Mat &img2)
+std::vector<std::vector<cv::Point2i> > LineDetection::detectLines(cv::Mat &img1, cv::Mat &img2, bool isHorizon)
 {
     std::vector<std::vector<cv::Point2i> > lines;
     std::vector<cv::Point2i> points;
@@ -556,7 +556,7 @@ std::vector<std::vector<cv::Point2i> > LineDetection::detectLines(cv::Mat &img1,
     cv::Mat diff = img1-img2;
     cv::Mat cross = cv::Mat::zeros(diff.rows, diff.cols, CV_8UC1);
     cv::Mat cross_inv = cv::Mat::zeros(diff.rows, diff.cols, CV_8UC1);
-	double thresh = 100;
+	double thresh = 45;
     bool positive; // Whether previous found cross point was positive
     bool search; // Whether serching
     bool found_first;
@@ -681,7 +681,70 @@ std::vector<std::vector<cv::Point2i> > LineDetection::detectLines(cv::Mat &img1,
 //            val_prev = val_now;
 //        }
 //    }
-    
+
+	if (isHorizon)
+	{
+		cv::Mat cross_morph;
+		cv::Mat element1 = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(9, 9));
+		cv::morphologyEx(cross, cross_morph, cv::MORPH_BLACKHAT, element1, cv::Point(-1, -1), 3);
+		cv::Mat cross_morph_;
+		cv::Mat element2 = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
+		cv::morphologyEx(cross_morph, cross_morph_, cv::MORPH_CLOSE, element2);
+
+		cross = cross - cross_morph_;
+		cv::threshold(cross, cross, 0, 255, cv::THRESH_BINARY);
+
+		cv::Sobel(cross, cross, CV_8U, 0, 1, 3, 1, 0, cv::BORDER_REFLECT); //soble_y
+
+		//cv::Mat crossNorm;
+		//crossNorm = cross / 255;
+
+		////cv::Mat cross_y;
+		////cv::reduce(crossNorm, cross_y, 1, cv::REDUCE_SUM, CV_32F);
+		////cv::threshold(cross_y, cross_y, 5, 1, cv::THRESH_BINARY);
+
+		//cv::Mat cross_x;
+		//cv::reduce(crossNorm, cross_x, 0, cv::REDUCE_SUM, CV_32F);
+		//cv::threshold(cross_x, cross_x, 50, 1, cv::THRESH_BINARY_INV);
+
+		////cv::Mat mask = cross_y * cross_x ;
+		//cv::Mat mask;
+		//cv::repeat(cross_x, img1.rows, 1, mask);
+		//mask.convertTo(mask, CV_8UC1);
+		//cross = cross.mul(mask);
+	}
+	else
+	{
+		cv::Mat cross_morph;
+		cv::Mat element1 = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(9, 9));
+		cv::morphologyEx(cross, cross_morph, cv::MORPH_BLACKHAT, element1, cv::Point(-1, -1), 3);
+		cv::Mat cross_morph_;
+		cv::Mat element2 = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
+		cv::morphologyEx(cross_morph, cross_morph_, cv::MORPH_CLOSE, element2);
+
+		cross = cross - cross_morph_;
+		cv::threshold(cross, cross, 0, 255, cv::THRESH_BINARY);
+
+		cv::Sobel(cross, cross, CV_8U, 1, 0, 3, 1, 0, cv::BORDER_REFLECT); //soble_x
+
+		//cv::Mat crossNorm;
+		//crossNorm = cross / 255;
+
+		////cv::Mat cross_x;
+		////cv::reduce(crossNorm, cross_x, 0, cv::REDUCE_SUM, CV_32F);
+		////cv::threshold(cross_x, cross_x, 5, 1, cv::THRESH_BINARY);
+
+		//cv::Mat cross_y;
+		//cv::reduce(crossNorm, cross_y, 1, cv::REDUCE_SUM, CV_32F);
+		//cv::threshold(cross_y, cross_y, 50, 1, cv::THRESH_BINARY_INV);
+
+		////cv::Mat mask = cross_y * cross_x;
+		//cv::Mat mask;
+		//cv::repeat(cross_y, 1, img1.cols, mask);
+		//mask.convertTo(mask, CV_8UC1);
+		//cross = cross.mul(mask);
+		//cv::threshold(cross, cross, 0, 255, cv::THRESH_BINARY);
+	}
     lines = extractEdges(cross);
     
     // Remove noise
@@ -707,7 +770,7 @@ void LineDetection::removeNoisePts(std::vector<std::vector<cv::Point2i> >& lines
 			{
 				mat.at<uchar>(0, lines[num][i].x)++;
 			}
-			cv::threshold(mat, mat, 2, 1, cv::THRESH_TOZERO_INV);
+			cv::threshold(mat, mat, 3, 1, cv::THRESH_TOZERO_INV);
 
 			std::vector<cv::Point2i> lineTemp;
 			for (int i = 0; i < lines[num].size(); i++)
@@ -717,8 +780,16 @@ void LineDetection::removeNoisePts(std::vector<std::vector<cv::Point2i> >& lines
 					lineTemp.push_back(lines[num][i]);
 				}
 			}
-			lines[num].clear();
-			lines[num].assign(lineTemp.begin(), lineTemp.end());
+			if (!lineTemp.empty())
+			{
+				lines[num].clear();
+				lines[num].assign(lineTemp.begin(), lineTemp.end());
+			}
+			else
+			{
+				lines.erase(lines.begin() + num);
+				--num;
+			}
 		}
 
 	}
@@ -731,7 +802,7 @@ void LineDetection::removeNoisePts(std::vector<std::vector<cv::Point2i> >& lines
 			{
 				mat.at<uchar>(0, lines[num][i].y)++;
 			}
-			cv::threshold(mat, mat, 2, 1, cv::THRESH_TOZERO_INV);
+			cv::threshold(mat, mat, 3, 1, cv::THRESH_TOZERO_INV);
 
 			std::vector<cv::Point2i> lineTemp;
 			for(int i = 0; i< lines[num].size(); i++)
@@ -741,8 +812,16 @@ void LineDetection::removeNoisePts(std::vector<std::vector<cv::Point2i> >& lines
 					lineTemp.push_back(lines[num][i]);
 				}
 			}
-			lines[num].clear();
-			lines[num].assign(lineTemp.begin(), lineTemp.end());
+			if (!lineTemp.empty())
+			{
+				lines[num].clear();
+				lines[num].assign(lineTemp.begin(), lineTemp.end());
+			}
+			else
+			{
+				lines.erase(lines.begin() + num);
+				--num;
+			}
 		}
 	}
 }

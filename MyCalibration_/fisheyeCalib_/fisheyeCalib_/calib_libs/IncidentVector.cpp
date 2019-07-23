@@ -8,6 +8,7 @@
 
 #include "IncidentVector.h"
 
+//?全局变量?
 double IncidentVector::f, IncidentVector::f0;
 std::vector<double> IncidentVector::a;
 std::vector<double> IncidentVector::b;
