@@ -32,4 +32,12 @@ struct calibInfo
 	int chessRowNum;
 	int chessColNum;
 	std::string stereoCalib;		//stereo calibration data based on rectified chessboard images
+	std::string stereoCalib_undistort_mapxL;
+	std::string stereoCalib_undistort_mapyL;
+	std::string stereoCalib_undistort_mapxR;
+	std::string stereoCalib_undistort_mapyR;
+	std::string stereoCalib_rectify_mapxL;
+	std::string stereoCalib_rectify_mapyL;
+	std::string stereoCalib_rectify_mapxR;
+	std::string stereoCalib_rectify_mapyR;
 };

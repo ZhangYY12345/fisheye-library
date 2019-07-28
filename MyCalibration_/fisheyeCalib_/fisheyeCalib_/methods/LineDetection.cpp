@@ -425,14 +425,16 @@ void LineDetection::processAllImages()
 //                    cv::resize(tmp, img[i], cv::Size(), unit, unit, cv::INTER_CUBIC);
                 }
                 edges[0] = detectLines(img[0], img[1], false);
-				removeNoiseLine(edges[0], false);
-				removeNoisePts(edges[0], img[0].size(), false);
+				//removeNoiseLine(edges[0], false);
+				//removeNoisePts(edges[0], img[0].size(), false);
                 //edges[0] = detectValley(img[0], img[1]);
                 //display(cv::Size2i(img[0].cols, img[0].rows), edges[0], "edges");
                 //edges[1] = detectValley(img[2], img[3]);
+				std::cout << edges[0].size() << std::endl;
                 edges[1] = detectLines(img[2], img[3], true);
-				removeNoiseLine(edges[1], true);
-				removeNoisePts(edges[1], img[2].size(), true);
+				std::cout << edges[1].size() << std::endl;
+				//removeNoiseLine(edges[1], true);
+				//removeNoisePts(edges[1], img[2].size(), true);
                 //display(cv::Size2i(img[2].cols, img[2].rows), edges[1], "edges");
                 break;
                 
@@ -694,8 +696,9 @@ std::vector<std::vector<cv::Point2i> > LineDetection::detectLines(cv::Mat &img1,
 		cross = cross - cross_morph_;
 		cv::threshold(cross, cross, 0, 255, cv::THRESH_BINARY);
 
+		//cv::Mat cross_y;
 		cv::Sobel(cross, cross, CV_8U, 0, 1, 3, 1, 0, cv::BORDER_REFLECT); //soble_y
-
+		//cv::bitwise_and(cross, cross_y, cross);
 		//cv::Mat crossNorm;
 		//crossNorm = cross / 255;
 
@@ -725,8 +728,9 @@ std::vector<std::vector<cv::Point2i> > LineDetection::detectLines(cv::Mat &img1,
 		cross = cross - cross_morph_;
 		cv::threshold(cross, cross, 0, 255, cv::THRESH_BINARY);
 
+		//cv::Mat cross_x;
 		cv::Sobel(cross, cross, CV_8U, 1, 0, 3, 1, 0, cv::BORDER_REFLECT); //soble_x
-
+		//cv::bitwise_and(cross, cross_x, cross);
 		//cv::Mat crossNorm;
 		//crossNorm = cross / 255;
 

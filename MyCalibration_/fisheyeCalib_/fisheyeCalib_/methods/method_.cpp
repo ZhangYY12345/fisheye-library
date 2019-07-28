@@ -114,7 +114,7 @@ void fisheyeCalib_(fisheyeCalibInfo infoStereoCalib)
 //    calib.calibrate(false);
 	IncidentVector::initA(a_size);
 	calib.calibrate(false);
-	//    calib.calibrate(true);
+	//calib.calibrate(true);
 		//calib.calibrate2();
 
 	std::string outname = infoStereoCalib.calibFile;
@@ -340,10 +340,14 @@ void rectify_(calibInfo infoStereoCalib)
 	cv::Size imgSize = IncidentVector::getImgSize();
 
 	cv::Mat K1, K2, D1, D2;
+	vector<Mat> Rs_L, Ts_L, Rs_R, Ts_R;
+	double rmsL = calibrateCamera(ptsReal, ptsLeft, imgSize, K1, D1, Rs_L, Ts_L);
+	double rmsR = calibrateCamera(ptsReal, ptsRight, imgSize, K2, D2, Rs_R, Ts_R);
+
 	cv::Mat matrixR, matrixT;
 	cv::Mat E, F, Q;
 	int stereoFlag = 0;
-	//stereoFlag |= cv::CALIB_USE_INTRINSIC_GUESS;
+	stereoFlag |= cv::CALIB_USE_INTRINSIC_GUESS;
 	//stereoFlag |= cv::CALIB_FIX_S1_S2_S3_S4;
 	//stereoFlag |= cv::CALIB_ZERO_TANGENT_DIST;
 	//stereoFlag |= cv::CALIB_FIX_INTRINSIC;
@@ -373,10 +377,6 @@ void rectify_(calibInfo infoStereoCalib)
 	initUndistortRectifyMap(K2, D2, R2, P2, imgSize, CV_32F, rmapx, rmapy);
 
 	FileStorage fn(infoStereoCalib.stereoCalib, FileStorage::WRITE);
-	fn << "Fisheye_Undistort_Map_mapxL" << mapxL;
-	fn << "Fisheye_Undistort_Map_mapyL" << mapyL;
-	fn << "Fisheye_Undistort_Map_mapxR" << mapxR;
-	fn << "Fisheye_Undistort_Map_mapyR" << mapyR;
 	fn << "ImgSize" << imgSize;
 	fn << "StereoCalib_K1" << K1;
 	fn << "StereoCalib_D1" << D1;
@@ -384,13 +384,44 @@ void rectify_(calibInfo infoStereoCalib)
 	fn << "StereoCalib_D2" << D2;
 	fn << "StereoCalib_R" << matrixR;
 	fn << "StereoCalib_T" << matrixT;
+	fn << "StereoCalib_E" << E;
+	fn << "StereoCalib_F" << F;
 	fn << "Rectify_R1" << R1;
 	fn << "Rectify_R2" << R2;
 	fn << "Rectify_P1" << P1;
 	fn << "Rectify_P2" << P2;
-	fn << "Stereo_Rectify_Map_mapxL" << lmapx;
-	fn << "Stereo_Rectify_Map_mapyL" << lmapy;
-	fn << "Stereo_Rectify_Map_mapxR" << rmapx;
-	fn << "Stereo_Rectify_Map_mapyR" << rmapy;
+	fn << "Rectify_Q" << Q_;
 	fn.release();
+
+	FileStorage fn_1(infoStereoCalib.stereoCalib_undistort_mapxL, FileStorage::WRITE);
+	fn_1 << "Fisheye_Undistort_Map_mapxL" << mapxL;
+	fn_1.release();
+
+	FileStorage fn_2(infoStereoCalib.stereoCalib_undistort_mapyL, FileStorage::WRITE);
+	fn_2 << "Fisheye_Undistort_Map_mapyL" << mapyL;
+	fn_2.release();
+
+	FileStorage fn_3(infoStereoCalib.stereoCalib_undistort_mapxR, FileStorage::WRITE);
+	fn_3 << "Fisheye_Undistort_Map_mapxR" << mapxR;
+	fn_3.release();
+
+	FileStorage fn_4(infoStereoCalib.stereoCalib_undistort_mapyR, FileStorage::WRITE);
+	fn_4 << "Fisheye_Undistort_Map_mapyR" << mapyR;
+	fn_4.release();
+
+	FileStorage fn_5(infoStereoCalib.stereoCalib_rectify_mapxL, FileStorage::WRITE);
+	fn_5 << "Stereo_Rectify_Map_mapxL" << lmapx;
+	fn_5.release();
+
+	FileStorage fn_6(infoStereoCalib.stereoCalib_rectify_mapyL, FileStorage::WRITE);
+	fn_6 << "Stereo_Rectify_Map_mapyL" << lmapy;
+	fn_6.release();
+
+	FileStorage fn_7(infoStereoCalib.stereoCalib_rectify_mapxR, FileStorage::WRITE);
+	fn_7 << "Stereo_Rectify_Map_mapxR" << rmapx;
+	fn_7.release();
+
+	FileStorage fn_8(infoStereoCalib.stereoCalib_rectify_mapyR, FileStorage::WRITE);
+	fn_8 << "Stereo_Rectify_Map_mapyR" << rmapy;
+	fn_8.release();
 }

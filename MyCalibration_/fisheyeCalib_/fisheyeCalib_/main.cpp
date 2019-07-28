@@ -4,8 +4,8 @@
 //  main.cpp
 //  Calibration
 //
-//  Created by Ryohei Suda on 2014/03/30.
-//  Copyright (c) 2014 Ryohei Suda. All rights reserved.
+//  Created by ZYY on 2019/07/28.
+//  Copyright (c) 2019 ZYY. All rights reserved.
 //
 
 #include <iostream>
@@ -33,16 +33,12 @@ int main(int argc, const char * argv[])
 
 	//stereo calibration based on unditort images
 	//std::string imgPath = "C:\\Users\\lenovo\\Web\\CaptureFiles\\2019-07-23";
-	std::string imgPath = "D:\\studying\\stereo vision\\research code\\data\\2019-07-23";
+	std::string imgPath = "D:\\studying\\stereo vision\\research code\\data\\20190723-3";
 
 	//load all the images in the folder
 	cv::String filePath = imgPath + "\\*L.jpg";
 	std::vector<cv::String> fileNames;
 	cv::glob(filePath, fileNames, false);
-
-	cv::Mat distImgL_, distImgR_;
-	distImgL_ = cv::imread(fileNames[0]);
-	distImgR_ = cv::imread(fileNames[0].substr(0, fileNames[0].length() - 5) + "R.jpg");
 
 	/****************************************
 	***reprojection and get the rectified images
@@ -56,85 +52,61 @@ int main(int argc, const char * argv[])
 	infoCalib.chessRowNum = 6;
 	infoCalib.chessColNum = 9;
 	infoCalib.stereoCalib = "unditortStereoCalib.xml";
+	infoCalib.stereoCalib_undistort_mapxL = "undistort_mapxL.xml";
+	infoCalib.stereoCalib_undistort_mapyL = "undistort_mapyL.xml";
+	infoCalib.stereoCalib_undistort_mapxR = "undistort_mapxR.xml";
+	infoCalib.stereoCalib_undistort_mapyR = "undistort_mapyR.xml";
+
+	infoCalib.stereoCalib_rectify_mapxL = "rectify_mapxL.xml";
+	infoCalib.stereoCalib_rectify_mapyL = "rectify_mapyL.xml";
+	infoCalib.stereoCalib_rectify_mapxR = "rectify_mapxR.xml";
+	infoCalib.stereoCalib_rectify_mapyR = "rectify_mapyR.xml";
+
 	rectify_(infoCalib);
+
 
 	cv::Mat mapxL, mapyL, mapxR, mapyR;
 	cv::Mat lmapx, lmapy, rmapx, rmapy;
 	cv::Size imgSize;
 
-	//cv::FileStorage fn(infoCalib.stereoCalib, cv::FileStorage::READ);
-	//fn["Fisheye_Undistort_Map_mapxL"] >> mapxL;
-	//fn["Fisheye_Undistort_Map_mapyL"] >> mapyL;
-	//fn["Fisheye_Undistort_Map_mapxR"] >> mapxR;
-	//fn["Fisheye_Undistort_Map_mapyR"] >> mapyR;
-	//fn["ImgSize"] >> imgSize;
-	//fn["Stereo_Rectify_Map_mapxL"] >> lmapx;
-	//fn["Stereo_Rectify_Map_mapyL"] >> lmapy;
-	//fn["Stereo_Rectify_Map_mapxR"] >> rmapx;
-	//fn["Stereo_Rectify_Map_mapyR"] >> rmapy;
-	//fn.release();
+	cv::Mat K1, K2, D1, D2, matrixR, matrixT;
+	cv::FileStorage fn(infoCalib.stereoCalib, cv::FileStorage::READ);
+	fn["ImgSize"] >> imgSize;
+	fn["StereoCalib_K1"] >> K1;
+	fn["StereoCalib_D1"] >> D1;
+	fn["StereoCalib_K2"] >> K2;
+	fn["StereoCalib_D2"] >> D2;
+	fn["StereoCalib_R"] >> matrixR;
+	fn["StereoCalib_T"] >> matrixT;
+	fn.release();
 
-	cv::FileStorage fn_1("mapxL.xml", cv::FileStorage::READ);
-	fn_1["Fisheye_Undistort_Map_mapxL"] >> mapxL;
-	fn_1.release();
-
-	cv::FileStorage fn_2("mapyL.xml", cv::FileStorage::READ);
-	fn_2["Fisheye_Undistort_Map_mapyL"] >> mapxL;
+	cv::FileStorage fn_2(infoCalib.stereoCalib_undistort_mapyL, cv::FileStorage::READ);
+	fn_2["Fisheye_Undistort_Map_mapyL"] >> mapyL;
 	fn_2.release();
 
-	cv::FileStorage fn_3("mapxR.xml", cv::FileStorage::READ);
-	fn_3["Fisheye_Undistort_Map_mapxR"] >> mapxL;
+	cv::FileStorage fn_3(infoCalib.stereoCalib_undistort_mapxR, cv::FileStorage::READ);
+	fn_3["Fisheye_Undistort_Map_mapxR"] >> mapxR;
 	fn_3.release();
 
-	cv::FileStorage fn_4("mapyR.xml", cv::FileStorage::READ);
-	fn_4["Fisheye_Undistort_Map_mapyR"] >> mapxL;
+	cv::FileStorage fn_4(infoCalib.stereoCalib_undistort_mapyR, cv::FileStorage::READ);
+	fn_4["Fisheye_Undistort_Map_mapyR"] >> mapyR;
 	fn_4.release();
 
-	cv::FileStorage fn_5("lmapx.xml", cv::FileStorage::READ);
+	cv::FileStorage fn_5(infoCalib.stereoCalib_rectify_mapxL, cv::FileStorage::READ);
 	fn_5["Stereo_Rectify_Map_mapxL"] >> lmapx;
 	fn_5.release();
 
-	cv::FileStorage fn_6("lmapy.xml", cv::FileStorage::READ);
+	cv::FileStorage fn_6(infoCalib.stereoCalib_rectify_mapyL, cv::FileStorage::READ);
 	fn_6["Stereo_Rectify_Map_mapyL"] >> lmapy;
 	fn_6.release();
 
-	cv::FileStorage fn_7("rmapx.xml", cv::FileStorage::READ);
+	cv::FileStorage fn_7(infoCalib.stereoCalib_rectify_mapxR, cv::FileStorage::READ);
 	fn_7["Stereo_Rectify_Map_mapxR"] >> rmapx;
 	fn_7.release();
 
-	cv::FileStorage fn_8("rmapy.xml", cv::FileStorage::READ);
+	cv::FileStorage fn_8(infoCalib.stereoCalib_rectify_mapyR, cv::FileStorage::READ);
 	fn_8["Stereo_Rectify_Map_mapyR"] >> rmapy;
 	fn_8.release();
-
-
-	//cv::imwrite("Fisheye_Undistort_Map_mapxL.jpg", mapxL);
-	//cv::imwrite("Fisheye_Undistort_Map_mapyL.jpg", mapyL);
-	//cv::imwrite("Fisheye_Undistort_Map_mapxR.jpg", mapxR);
-	//cv::imwrite("Fisheye_Undistort_Map_mapyR.jpg", mapyR);
-	//cv::imwrite("Stereo_Rectify_Map_mapxL.jpg", lmapx);
-	//cv::imwrite("Stereo_Rectify_Map_mapyL.jpg", lmapy);
-	//cv::imwrite("Stereo_Rectify_Map_mapxR.jpg", rmapx);
-	//cv::imwrite("Stereo_Rectify_Map_mapyR.jpg", rmapy);
-
-
-	//mapxL=cv::imread("Fisheye_Undistort_Map_mapxL.jpg");
-	//mapyL=cv::imread("Fisheye_Undistort_Map_mapyL.jpg");
-	//mapxR=cv::imread("Fisheye_Undistort_Map_mapxR.jpg");
-	//mapyR=cv::imread("Fisheye_Undistort_Map_mapyR.jpg");
-	//lmapx=cv::imread("Stereo_Rectify_Map_mapxL.jpg");
-	//lmapy=cv::imread("Stereo_Rectify_Map_mapyL.jpg");
-	//rmapx=cv::imread("Stereo_Rectify_Map_mapxR.jpg");
-	//rmapy=cv::imread("Stereo_Rectify_Map_mapyR.jpg");
-
-	//mapxL.convertTo(mapxL, CV_32FC1);
-	//mapyL.convertTo(mapyL, CV_32FC1);
-	//mapxR.convertTo(mapxR, CV_32FC1);
-	//mapyR.convertTo(mapyR, CV_32FC1);
-	//lmapx.convertTo(lmapx, CV_32FC1);
-	//lmapy.convertTo(lmapy, CV_32FC1);
-	//rmapx.convertTo(rmapx, CV_32FC1);
-	//rmapy.convertTo(rmapy, CV_32FC1);
-
 
 	for (int i = 0; i < fileNames.size(); i++)
 	{
