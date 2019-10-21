@@ -14,9 +14,10 @@ using namespace cv;
 
 void fisheyeCalib_(fisheyeCalibInfo infoStereoCalib)
 {
+	
 	/****************************************
 	***detect lines in calibration images
-	****************************************/
+	****************************************//*
 	std::string fname = infoStereoCalib.calibPatternFile;	// "D:\\studying\\stereo vision\\research code\\fisheye-stereo-calibrate\\fisheye-library\\MyCalibration_\\fisheyeCalib_\\fisheyeCalib_\\patternsL.xml";
 	LineDetection ld;
 	//    ld.editAllEdges(ld.loadEdgeXML(fname));
@@ -30,7 +31,7 @@ void fisheyeCalib_(fisheyeCalibInfo infoStereoCalib)
 	ld.processAllImages();
 	//
 	std::string output = infoStereoCalib.calibLineDetected;
-	ld.writeXML(output);
+	ld.writeXML(output);*/
 
 
 	/****************************************
@@ -39,7 +40,7 @@ void fisheyeCalib_(fisheyeCalibInfo infoStereoCalib)
 	Calibration calib;
 	std::string filename = infoStereoCalib.calibLineDetected;
 	calib.loadData(filename);
-	int a_size = 4;
+	int a_size = 5;
 	IncidentVector::initA(a_size);
 	//    std::vector<double> a;
 	//    a.push_back(5e-3); a.push_back( 6e-4); a.push_back( 7e-5); a.push_back( 8e-6); a.push_back( 9e-7);
@@ -54,7 +55,7 @@ void fisheyeCalib_(fisheyeCalibInfo infoStereoCalib)
 	std::cout << "Projection Model:\t" << IncidentVector::getProjectionName() << std::endl;
 	std::cout << "Center:\t" << IncidentVector::getCenter() << std::endl;
 	std::cout << "     f:\t" << IncidentVector::getF() << std::endl;
-	for (int i = 0; i < IncidentVector::nparam - 3; ++i) {
+	for (int i = 0; i < IncidentVector::nparam - 5; ++i) {
 		std::cout << "    a" << i << ":\t" << IncidentVector::getA().at(i) << std::endl;
 	}
 

@@ -8,9 +8,9 @@
 
 #include "Calibration.h"
 
-void Calibration::setParameters(std::vector<Pair>& edges, double& f, double& f0, cv::Point2d& center, cv::Size2i& img_size, int a_size) {
+void Calibration::setParameters(std::vector<Pair>& edges, double& f, double& f0, cv::Point2d& center, cv::Size2i& img_size, cv::Point2d& px_size, int a_size) {
     std::vector<double> a(a_size, 0);
-    IncidentVector::setParameters(f, f0, a, img_size, center);
+    IncidentVector::setParameters(f, f0, a, img_size, center, px_size);
     this->edges = edges;
 }
 
@@ -23,11 +23,14 @@ void Calibration::loadData(std::string filename) {
     }
     tinyxml2::XMLElement *root = doc.FirstChildElement("lines");
     
-    double unit = atof(root->FirstChildElement("pixel_size")->GetText());
-    double f = atof(root->FirstChildElement("focal_length")->GetText()) / unit;
+	double f = atof(root->FirstChildElement("focal_length")->GetText());
     IncidentVector::setF(f);
     IncidentVector::setF0((int)f);
-    
+
+    double unit_x = atof(root->FirstChildElement("pixel_size_x")->GetText());
+	double unit_y = atof(root->FirstChildElement("pixel_size_y")->GetText());
+	IncidentVector::setPxSize(cv::Point2d(unit_x, unit_y));
+
     cv::Size2i img_size;
     cv::Point2d center;
     img_size.width = atoi(root->FirstChildElement("width")->GetText());		//atoi()将字符串转换为整型数
@@ -142,7 +145,8 @@ void Calibration::calibrate(bool divide)
     const auto start_time = std::chrono::system_clock::now();
     double J0;
     double C = 0.0001;
-    
+
+#pragma omp parallel for
     for (auto &pair : edges) {
         pair.calcM();
         pair.calcNormal();
@@ -185,11 +189,12 @@ void Calibration::calibrate(bool divide)
         //    式(7), (10), (13) によって∂mκα/∂c を計算する(c = u0, v0, f, a1, a2, ...)．
 
 		//根据式(3)计算入射角θ成为α，根据式(6)计算入射光矢量m成为α，
+#pragma omp parallel for
         for (auto &pair : edges) {
             pair.calcM();
             pair.calcNormal();
             pair.calcLine();
-            pair.calcDerivatives();
+            pair_calcDerivatives(pair);
         }
         
         //    ( 3 ) それらを用いてJ のパラメータに関する1 階微分Jc，2 階微分Jcc0 を計算する
@@ -238,15 +243,17 @@ void Calibration::calibrate(bool divide)
             IncidentVector::setF(f_);
             IncidentVector::setA(a_);
             IncidentVector::setCenter(center_);
+#pragma omp parallel for
             for (auto &pair : edges) {
                 pair.calcM();
                 pair.calcNormal();
                 pair.calcLine();
             }
-            
-            j1 = J1();
+
+        	j1 = J1();
             j2 = J2();
             j3 = J3();
+
             J_ =  j1 / gamma[0] + j2 / gamma[1] + j3 / gamma[2];
 			//J_ = j2 / gamma[1] + j3 / gamma[2];
             std::cout << "C: " << C << "\tJ0: " << J0 << "\tJ_: " << J_;
@@ -319,7 +326,8 @@ void Calibration::calibrate2()
     double (Calibration::*Jcc[3])(int, int) = {&Calibration::J1cc, &Calibration::J2cc,&Calibration::J3cc};
     while(true){
     for (int t = 2; t >= 0; --t) { // For each of Orthongonality, Parallelism, and Colinearity
-        
+
+#pragma omp parallel for
         for (auto &pair : edges) {
             pair.calcM();
             pair.calcNormal();
@@ -354,11 +362,12 @@ void Calibration::calibrate2()
             //    式(7), (10), (13) によって∂mκα/∂c を計算する(c = u0, v0, f, a1, a2, ...)．
 
 			//根据式(3)计算入射角θ成为α，根据式(6)计算入射光矢量m成为α，
+#pragma omp parallel for
             for (auto &pair : edges) {
                 pair.calcM();
                 pair.calcNormal();
                 pair.calcLine();
-                pair.calcDerivatives();
+                pair_calcDerivatives(pair);
             }
             
             //    ( 3 ) それらを用いてJ のパラメータに関する1 階微分Jc，2 階微分Jcc0 を計算する
@@ -398,6 +407,7 @@ void Calibration::calibrate2()
                 IncidentVector::setF(f_);
                 IncidentVector::setA(a_);
                 IncidentVector::setCenter(center_);
+#pragma omp parallel for
                 for (auto &pair : edges) {
                     pair.calcM();
                     pair.calcNormal();

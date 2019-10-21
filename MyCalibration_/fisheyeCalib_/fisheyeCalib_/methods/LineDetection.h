@@ -20,7 +20,7 @@ class LineDetection
 {
 private:
     double focal_length;
-    double pixel_size;
+    double pixel_size_x, pixel_size_y;
     cv::Size2i img_size;
     std::string projection;
     tinyxml2::XMLDocument output;

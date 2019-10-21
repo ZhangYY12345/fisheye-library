@@ -21,14 +21,14 @@ int main(int argc, const char * argv[])
 {
 	//single fisheye camera calibration
 	fisheyeCalibInfo calibInfoL, calibInfoR;
-	calibInfoL.calibPatternFile = "patternsL.xml";
-	calibInfoL.calibLineDetected = "linesDetectedL.xml";
-	calibInfoL.calibFile = "resCalibL.xml";
+	calibInfoL.calibPatternFile = "./20191017-1/patternsL.xml"; //"patternsL.xml";
+	calibInfoL.calibLineDetected = "./20191017-1/linesDetectedL.xml";
+	calibInfoL.calibFile = "./20191017-1/resCalibL.xml";
 	fisheyeCalib_(calibInfoL);
 
-	calibInfoR.calibPatternFile = "patternsR.xml";
-	calibInfoR.calibLineDetected = "linesDetectedR.xml";
-	calibInfoR.calibFile = "resCalibR.xml";
+	calibInfoR.calibPatternFile = "./20191017-1/patternsR.xml";
+	calibInfoR.calibLineDetected = "./20191017-1/linesDetectedR.xml";
+	calibInfoR.calibFile = "./20191017-1/resCalibR.xml";
 	fisheyeCalib_(calibInfoR);
 
 	//stereo calibration based on unditort images

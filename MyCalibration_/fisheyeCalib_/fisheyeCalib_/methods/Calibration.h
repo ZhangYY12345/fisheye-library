@@ -36,7 +36,7 @@ public:
 //    std::vector<double> a;
     std::vector<Pair> edges;
     
-    void setParameters(std::vector<Pair>& edges, double& f, double& f0, cv::Point2d& center, cv::Size2i& img_size, int a_size);
+    void setParameters(std::vector<Pair>& edges, double& f, double& f0, cv::Point2d& center, cv::Size2i& img_size, cv::Point2d& px_size, int a_size);
     void loadData(std::string);
     void save(std::string);
     

@@ -89,8 +89,8 @@ public:
     void calcNc();
     void calcNcc();
     void calcLc();
-    void calcDerivatives();
 };
 
+void pair_calcDerivatives(Pair& obj);
 
 #endif

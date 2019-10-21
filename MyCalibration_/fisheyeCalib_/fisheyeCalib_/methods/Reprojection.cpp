@@ -16,6 +16,7 @@ void Reprojection::loadPrameters(std::string filename)
     double f, f0;
     cv::Point2d center;
     cv::Size2i img_size;
+	cv::Point2d px_size;
     std::vector<double> a;
     
     if (!fs.isOpened()) {
@@ -26,6 +27,7 @@ void Reprojection::loadPrameters(std::string filename)
     fs["f0"] >> f0;
     fs["center"] >> center;
     fs["img_size"] >> img_size;
+	fs["px_size"] >> px_size;
     fs["projection"] >> projection;
     
     a.clear();
@@ -36,7 +38,7 @@ void Reprojection::loadPrameters(std::string filename)
     }
     
     IncidentVector::setProjection(projection);
-    IncidentVector::setParameters(f, f0, a, img_size, center);
+    IncidentVector::setParameters(f, f0, a, img_size, center, px_size);
 }
 
 

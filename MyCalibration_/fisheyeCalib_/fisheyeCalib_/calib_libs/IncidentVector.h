@@ -26,6 +26,8 @@ protected:
     static std::vector<double> b; // Distortion parameters (even)	？偶次幂系数
     static cv::Point2d center; // Optical center (u_0, v_0):光学中心在图像物理坐标系中的坐标：图像中心
     static cv::Size2i img_size; // Image size
+	static cv::Point2d px_size; // pixel size， 单位mm
+
     double theta;
     double r;
     static std::string projection_name[PROJECTION_NUM];
@@ -35,9 +37,18 @@ protected:
     void calcCommonPart(); // Calculate common part of derivatives
     virtual cv::Point3d calcDu() = 0;	//依据不同的成像模型，分别实现函数
     virtual cv::Point3d calcDv() = 0;
+	virtual cv::Point3d calcDpx() = 0;
+	virtual cv::Point3d calcDpy() = 0;
     virtual cv::Point3d calcDf() = 0;
     virtual std::vector<cv::Point3d> calcDak() = 0;
-    
+
+	virtual void calcDu(cv::Point3d& res) = 0;	//依据不同的成像模型，分别实现函数
+	virtual void calcDv(cv::Point3d& res) = 0;
+	virtual void calcDpx(cv::Point3d& res) = 0;
+	virtual void calcDpy(cv::Point3d& res) = 0;
+	virtual void calcDf(cv::Point3d& res) = 0;
+	virtual void calcDak(std::vector<cv::Point3d>& res) = 0;
+
 public:
     cv::Point3d m;
     cv::Point2d point;		//图像物理坐标
@@ -47,40 +58,49 @@ public:
     IncidentVector(cv::Point2d p);
     
     // Setter and getter
-    static void setParameters(double f, double f0, std::vector<double> a, cv::Size2i img_size, cv::Point2d center);
+    static void setParameters(double f, double f0, std::vector<double> a, cv::Size2i img_size, cv::Point2d center, cv::Point2d px_size);
     static void setF(double f){ IncidentVector::f = f; }
     static double getF() { return IncidentVector::f; }
     static void setF0(double f0) { IncidentVector::f0 = f0; }
     static double getF0() { return IncidentVector::f0; }
     static void setA(std::vector<double> a) {
         IncidentVector::a = a;
-        IncidentVector::nparam = 3 + (int)a.size();
+        IncidentVector::nparam = 5 + (int)a.size();
     }
 	//初始化相机参数：内参+畸变参数
     static void initA(int a_size) {
         std::vector<double> a(a_size, 0);
         IncidentVector::a = a;
-        IncidentVector::nparam = 3 + a_size;
+        IncidentVector::nparam = 5 + a_size;
     }
     static std::vector<double> getA() { return IncidentVector::a; }
+    static int A(int i) { return 5 + i; }
+
     static void setB(std::vector<double> b) {
         IncidentVector::b = b;
-        IncidentVector::nparam = 3 + (int)a.size() + (int)b.size();
+        IncidentVector::nparam = 5 + (int)a.size() + (int)b.size();
     }
     static void initB(int b_size) {
         std::vector<double> b(b_size, 0);
         IncidentVector::b = b;
-        IncidentVector::nparam = 3 + (int)a.size() + (int)b.size();
+        IncidentVector::nparam = 5 + (int)a.size() + (int)b.size();
     }
     static std::vector<double> getB() { return IncidentVector::b; }
+
     static void setImgSize(cv::Size2i img_size) { IncidentVector::img_size = img_size; }
     static cv::Size2i getImgSize() { return IncidentVector::img_size; }
+
+	static void setPxSize(cv::Point2d px_size) { IncidentVector::px_size = px_size; }
+	static cv::Point2d getPxSize() { return IncidentVector::px_size; }
+
     static void setCenter(cv::Point2d c) { IncidentVector::center = c; }
     static cv::Point2d getCenter() { return IncidentVector::center; }
-    static int A(int i) { return 3 + i; }
+
+
     static void setProjection(std::string projection);
     static int getProjection() { return projection; }
     static std::string getProjectionName() { return projection_name[projection]; }
+
     double getTheta() {
         return theta;
     }

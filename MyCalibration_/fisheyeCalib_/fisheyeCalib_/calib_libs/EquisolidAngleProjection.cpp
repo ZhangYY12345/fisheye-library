@@ -7,7 +7,7 @@
 //
 
 #include "EquisolidAngleProjection.h"
-
+//r = 2 f sin(O-/2)
 EquisolidAngleProjection::EquisolidAngleProjection(cv::Point2d p): IncidentVector(p)
 {
 }
@@ -31,15 +31,15 @@ cv::Point3d EquisolidAngleProjection::calcDu()
 {
     if (r != 0) {
         cv::Point3d mu;
-        mu.x = -1/r + pow(point.x-center.x, 2) / pow(r, 3);
-        mu.y = (point.x-center.x) * (point.y-center.y) / pow(r, 3);
+        mu.x = (-1/r + pow((point.x - center.x) * px_size.x, 2) / pow(r, 3)) * px_size.x;
+        mu.y = (point.x-center.x) * (point.y-center.y) * pow(px_size.x, 2) * px_size.y / pow(r, 3);
         mu.z = 0;
         mu *= sin(theta);
         double tu = 1; // derivative of d(theta)/du
         for (int i = 0; i < a.size(); ++i) {
             tu += (2*i+3) * a[i] * pow(r/f0, 2*i+2);
         }
-        tu *= -(point.x-center.x) / (r * f * cos(theta/2));
+        tu *= -(point.x-center.x) * px_size.x * px_size.x / (r * f * cos(theta/2));
         mu += part * tu;
         return mu;
         
@@ -52,15 +52,15 @@ cv::Point3d EquisolidAngleProjection::calcDv()
 {
     if (r != 0) {
         cv::Point3d mv;
-        mv.x = (point.x-center.x) * (point.y-center.y) / pow(r, 3);
-        mv.y = -1/r + pow(point.y-center.y, 2) / pow(r, 3);
+        mv.x = (point.x-center.x) * (point.y-center.y) * px_size.y * px_size.y * px_size.x / pow(r, 3);
+        mv.y = (-1/r + pow((point.y - center.y) * px_size.y, 2) / pow(r, 3)) * px_size.y;
         mv.z = 0;
         mv *= sin(theta);
         double tv = 1; // derivative of d(theta)/dv
         for (int i = 0; i < a.size(); ++i) {
             tv += (2*i+3) * a[i] * pow(r/f0, 2*i+2);
         }
-        tv *= -(point.y-center.y) / (r * f * cos(theta/2));
+        tv *= -(point.y-center.y) * px_size.y * px_size.y / (r * f * cos(theta/2));
         mv += part * tv;
         return mv;
         
@@ -68,6 +68,51 @@ cv::Point3d EquisolidAngleProjection::calcDv()
         return cv::Point3d(0, 0, 0);
     }
 }
+
+cv::Point3d EquisolidAngleProjection::calcDpx()
+{
+	if (r != 0) {
+		cv::Point3d mpx;
+		mpx.x = (point.x - center.x) / r - pow(point.x - center.x, 3) * pow(px_size.x, 2) / pow(r, 3);
+		mpx.y = -pow(point.x - center.x, 2) * (point.y - center.y) * px_size.y * px_size.x / pow(r, 3);
+		mpx.z = 0;
+		mpx *= sin(theta);
+		double tpx = 1; // derivative of d(theta)/dv
+		for (int i = 0; i < a.size(); ++i) {
+			tpx += (2 * i + 3) * a[i] * pow(r / f0, 2 * i + 2);
+		}
+		tpx *= pow(point.x - center.x, 2) * px_size.x / (r * f * cos(theta / 2));
+		mpx += part * tpx;
+		return mpx;
+
+	}
+	else {
+		return cv::Point3d(0, 0, 0);
+	}
+}
+
+cv::Point3d EquisolidAngleProjection::calcDpy()
+{
+	if (r != 0) {
+		cv::Point3d mpy;
+		mpy.x = -pow(point.y - center.y, 2) * (point.x - center.x) * px_size.y * px_size.x / pow(r, 3);
+		mpy.y = (point.y - center.y) / r - pow(point.y - center.y, 3) * pow(px_size.y, 2) / pow(r, 3);
+		mpy.z = 0;
+		mpy *= sin(theta);
+		double tpy = 1; // derivative of d(theta)/dv
+		for (int i = 0; i < a.size(); ++i) {
+			tpy += (2 * i + 3) * a[i] * pow(r / f0, 2 * i + 2);
+		}
+		tpy *= pow(point.y - center.y, 2) * px_size.y / (r * f * cos(theta / 2));
+		mpy += part * tpy;
+		return mpy;
+
+	}
+	else {
+		return cv::Point3d(0, 0, 0);
+	}
+}
+
 cv::Point3d EquisolidAngleProjection::calcDf()
 {
     cv::Point3d mf;

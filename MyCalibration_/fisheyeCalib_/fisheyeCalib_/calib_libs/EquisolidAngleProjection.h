@@ -17,9 +17,18 @@ class EquisolidAngleProjection : public IncidentVector
 private:
     cv::Point3d calcDu();
     cv::Point3d calcDv();
+	cv::Point3d calcDpx();
+	cv::Point3d calcDpy();
     cv::Point3d calcDf();
     std::vector<cv::Point3d> calcDak();
-    
+
+	void calcDu(cv::Point3d& res);	//依据不同的成像模型，分别实现函数
+	void calcDv(cv::Point3d& res);
+	void calcDpx(cv::Point3d& res);
+	void calcDpy(cv::Point3d& res);
+	void calcDf(cv::Point3d& res);
+	void calcDak(std::vector<cv::Point3d>& res);
+
 public:
     EquisolidAngleProjection(cv::Point2d p);
     double aoi(double r); // Calculate theta
