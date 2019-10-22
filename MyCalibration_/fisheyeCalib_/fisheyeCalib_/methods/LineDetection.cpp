@@ -7,6 +7,7 @@
 //
 
 #include "LineDetection.h"
+#include <vector>
 
 int LineDetection::unit = 1;
 
@@ -36,8 +37,8 @@ void LineDetection::loadImageXML(std::string filename)
     focal_length = atof(fl);
     
     const char *ps = root->FirstChildElement("pixel_size")->GetText();
-    pixel_size = atof(ps);
-    
+	pixel_size = atof(ps);
+
     projection = root->FirstChildElement("projection")->GetText();
     
     img_size.width = atoi(root->FirstChildElement("width")->GetText());
@@ -71,7 +72,6 @@ void LineDetection::loadImageXML(std::string filename)
         image_names.push_back(p);
         node = node->NextSiblingElement("pair");
     }
-    
 }
 
 /*
@@ -428,14 +428,14 @@ void LineDetection::processAllImages()
 				//removeNoiseLine(edges[0], false);
 				//removeNoisePts(edges[0], img[0].size(), false);
                 //edges[0] = detectValley(img[0], img[1]);
-                //display(cv::Size2i(img[0].cols, img[0].rows), edges[0], "edges");
+                display(cv::Size2i(img[0].cols, img[0].rows), edges[0], "edges");
                 //edges[1] = detectValley(img[2], img[3]);
 				std::cout << edges[0].size() << std::endl;
                 edges[1] = detectLines(img[2], img[3], true);
 				std::cout << edges[1].size() << std::endl;
 				//removeNoiseLine(edges[1], true);
 				//removeNoisePts(edges[1], img[2].size(), true);
-                //display(cv::Size2i(img[2].cols, img[2].rows), edges[1], "edges");
+                display(cv::Size2i(img[2].cols, img[2].rows), edges[1], "edges");
                 break;
                 
             case Two:
@@ -482,10 +482,10 @@ void LineDetection::saveParameters()
     fl_elm->SetText(focal_length);
     output.RootElement()->InsertEndChild(fl_elm);
     
-    tinyxml2::XMLElement *ps_elm = output.NewElement("pixel_size");
-    ps_elm->SetText(pixel_size);
-    output.RootElement()->InsertEndChild(ps_elm);
-    
+    tinyxml2::XMLElement *psx_elm = output.NewElement("pixel_size");
+    psx_elm->SetText(pixel_size);
+    output.RootElement()->InsertEndChild(psx_elm);
+
     tinyxml2::XMLElement *width = output.NewElement("width");
     width->SetText(img_size.width);
     output.RootElement()->InsertEndChild(width);
@@ -558,146 +558,90 @@ std::vector<std::vector<cv::Point2i> > LineDetection::detectLines(cv::Mat &img1,
     cv::Mat diff = img1-img2;
     cv::Mat cross = cv::Mat::zeros(diff.rows, diff.cols, CV_8UC1);
     cv::Mat cross_inv = cv::Mat::zeros(diff.rows, diff.cols, CV_8UC1);
-	double thresh = 45;
+	double thresh = 185;
     bool positive; // Whether previous found cross point was positive
     bool search; // Whether serching
     bool found_first;
     int val_now, val_prev;
     
-    // search for x direction
-    for (int y = 0; y < diff.rows; y++) {
-        val_prev = diff.at<double>(y,0);
-        positive = (val_prev > 0);
-        search = false;
-        found_first = false;
-        for (int x = 1; x < diff.cols; ++x) {
-            val_now = diff.at<double>(y, x);
-            if (search && (
-                ((val_now <= 0) && positive) || ((val_now >= 0) && !positive))) {// found crossed point
-                if (abs(val_now) < abs(val_prev)) {
-                    cross.at<uchar>(y,x) = 255;
-                } else {
-                    cross.at<uchar>(y,x-1) = 255;
-                }
-                positive = !positive;
-                search = false;
-            }
-            if (!search && abs(val_now) > thresh) {
-                search = true;
-                if (!found_first) {
-                    found_first = true;
-                    positive = (val_now > 0);
-                }
-            }
-            val_prev = val_now;
-        }
-    }
-
-    // search for y direction
-    for (int x = 0; x < diff.cols; x++) {
-        val_prev = diff.at<double>(0,x);
-        positive = (val_prev > 0);
-        search = false;
-        found_first = false;
-        for (int y = 1; y < diff.rows; ++y) {
-            val_now = diff.at<double>(y,x);
-            if (search && (
-              ((val_now <= 0) && positive) || ((val_now >= 0) && !positive))) {// found crossed point
-                if (abs(val_now) < abs(val_prev)) {
-                    if (cross.at<uchar>(y,x) != 255) {
-                        cross.at<uchar>(y,x) = 255;
-                    }
-                } else {
-                    cross.at<uchar>(y-1,x) = 255;
-                }
-                positive = !positive;
-                search = false;
-            }
-            if (!search && abs(val_now) > thresh) {
-                search = true;
-                if (!found_first) {
-                    found_first = true;
-                    positive = (val_now > 0);
-                }
-            }
-            val_prev = val_now;
-        }
-    }
-    
-//    // search for inversed x direction
-//    for (int y = 0; y < diff.rows; y++) {
-//        val_prev = diff.at<double>(y,diff.cols-1);
-//        positive = (val_prev > 0);
-//        search = false;
-//        found_first = false;
-//        for (int x = diff.cols-2; x > 0; --x) {
-//            val_now = diff.at<double>(y, x);
-//            if (search && (
-//                           ((val_now <= 0) && positive) || ((val_now >= 0) && !positive))) {// found crossed point
-//                if (abs(val_now) < abs(val_prev)) {
-//                    cross_inv.at<uchar>(y,x) = 255;
-//                } else {
-//                    cross_inv.at<uchar>(y,x+1) = 255;
-//                }
-//                positive = !positive;
-//                search = false;
-//            }
-//            if (!search && abs(val_now) > thresh) {
-//                search = true;
-//                if (!found_first) {
-//                    found_first = true;
-//                    positive = (val_now > 0);
-//                }
-//            }
-//            val_prev = val_now;
-//        }
-//    }
-//    
-//    // search for inversed y direction
-//    for (int x = 0; x < diff.cols; x++) {
-//        val_prev = diff.at<double>(diff.rows-1,x);
-//        positive = (val_prev > 0);
-//        search = false;
-//        found_first = false;
-//        for (int y = diff.rows-2; y > 0; --y) {
-//            val_now = diff.at<double>(y,x);
-//            if (search && (
-//                           ((val_now <= 0) && positive) || ((val_now >= 0) && !positive))) {// found crossed point
-//                if (abs(val_now) < abs(val_prev)) {
-//                    if (cross_inv.at<uchar>(y,x) != 255) {
-//                        cross_inv.at<uchar>(y,x) = 255;
-//                    }
-//                } else {
-//                    cross_inv.at<uchar>(y+1,x) = 255;
-//                }
-//                positive = !positive;
-//                search = false;
-//            }
-//            if (!search && abs(val_now) > thresh) {
-//                search = true;
-//                if (!found_first) {
-//                    found_first = true;
-//                    positive = (val_now > 0);
-//                }
-//            }
-//            val_prev = val_now;
-//        }
-//    }
-
 	if (isHorizon)
 	{
-		cv::Mat cross_morph;
-		cv::Mat element1 = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(9, 9));
-		cv::morphologyEx(cross, cross_morph, cv::MORPH_BLACKHAT, element1, cv::Point(-1, -1), 3);
-		cv::Mat cross_morph_;
-		cv::Mat element2 = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
-		cv::morphologyEx(cross_morph, cross_morph_, cv::MORPH_CLOSE, element2);
+		// search for y direction
+		for (int x = 0; x < diff.cols; x++) {
+			val_prev = diff.at<double>(0, x);
+			positive = (val_prev > 0);
+			search = false;
+			found_first = false;
+			for (int y = 1; y < diff.rows; ++y) {
+				val_now = diff.at<double>(y, x);
+				if (search && (
+					((val_now <= 0) && positive) || ((val_now >= 0) && !positive))) {// found crossed point
+					if (abs(val_now) < abs(val_prev)) {
+						if (cross.at<uchar>(y, x) != 255) {
+							cross.at<uchar>(y, x) = 255;
+						}
+					}
+					else {
+						cross.at<uchar>(y - 1, x) = 255;
+					}
+					positive = !positive;
+					search = false;
+				}
+				if (!search && abs(val_now) > thresh) {
+					search = true;
+					if (!found_first) {
+						found_first = true;
+						positive = (val_now > 0);
+					}
+				}
+				val_prev = val_now;
+			}
+		}
 
-		cross = cross - cross_morph_;
-		cv::threshold(cross, cross, 0, 255, cv::THRESH_BINARY);
+		// search for inversed y direction
+		for (int x = 0; x < diff.cols; x++) {
+			val_prev = diff.at<double>(diff.rows - 1, x);
+			positive = (val_prev > 0);
+			search = false;
+			found_first = false;
+			for (int y = diff.rows - 2; y > 0; --y) {
+				val_now = diff.at<double>(y, x);
+				if (search && (
+					((val_now <= 0) && positive) || ((val_now >= 0) && !positive))) {// found crossed point
+					if (abs(val_now) < abs(val_prev)) {
+						if (cross_inv.at<uchar>(y, x) != 255) {
+							cross_inv.at<uchar>(y, x) = 255;
+						}
+					}
+					else {
+						cross_inv.at<uchar>(y + 1, x) = 255;
+					}
+					positive = !positive;
+					search = false;
+				}
+				if (!search && abs(val_now) > thresh) {
+					search = true;
+					if (!found_first) {
+						found_first = true;
+						positive = (val_now > 0);
+					}
+				}
+				val_prev = val_now;
+			}
+		}
 
-		//cv::Mat cross_y;
-		cv::Sobel(cross, cross, CV_8U, 0, 1, 3, 1, 0, cv::BORDER_REFLECT); //soble_y
+		////cv::Mat cross_morph;
+		////cv::Mat element1 = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(9, 9));
+		////cv::morphologyEx(cross, cross_morph, cv::MORPH_BLACKHAT, element1, cv::Point(-1, -1), 3);
+		////cv::Mat cross_morph_;
+		////cv::Mat element2 = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
+		////cv::morphologyEx(cross_morph, cross_morph_, cv::MORPH_CLOSE, element2);
+
+		////cross = cross - cross_morph_;
+		////cv::threshold(cross, cross, 0, 255, cv::THRESH_BINARY);
+
+		//////cv::Mat cross_y;
+		////cv::Sobel(cross, cross, CV_8U, 0, 1, 3, 1, 0, cv::BORDER_REFLECT); //soble_y
 		//cv::bitwise_and(cross, cross_y, cross);
 		//cv::Mat crossNorm;
 		//crossNorm = cross / 255;
@@ -718,18 +662,78 @@ std::vector<std::vector<cv::Point2i> > LineDetection::detectLines(cv::Mat &img1,
 	}
 	else
 	{
-		cv::Mat cross_morph;
-		cv::Mat element1 = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(9, 9));
-		cv::morphologyEx(cross, cross_morph, cv::MORPH_BLACKHAT, element1, cv::Point(-1, -1), 3);
-		cv::Mat cross_morph_;
-		cv::Mat element2 = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
-		cv::morphologyEx(cross_morph, cross_morph_, cv::MORPH_CLOSE, element2);
+		// search for x direction
+		for (int y = 0; y < diff.rows; y++) {
+			val_prev = diff.at<double>(y, 0);
+			positive = (val_prev > 0);
+			search = false;
+			found_first = false;
+			for (int x = 1; x < diff.cols; ++x) {
+				val_now = diff.at<double>(y, x);
+				if (search && (
+					((val_now <= 0) && positive) || ((val_now >= 0) && !positive))) {// found crossed point
+					if (abs(val_now) < abs(val_prev)) {
+						cross.at<uchar>(y, x) = 255;
+					}
+					else {
+						cross.at<uchar>(y, x - 1) = 255;
+					}
+					positive = !positive;
+					search = false;
+				}
+				if (!search && abs(val_now) > thresh) {
+					search = true;
+					if (!found_first) {
+						found_first = true;
+						positive = (val_now > 0);
+					}
+				}
+				val_prev = val_now;
+			}
+		}
 
-		cross = cross - cross_morph_;
-		cv::threshold(cross, cross, 0, 255, cv::THRESH_BINARY);
+		// search for inversed x direction
+		for (int y = 0; y < diff.rows; y++) {
+			val_prev = diff.at<double>(y, diff.cols - 1);
+			positive = (val_prev > 0);
+			search = false;
+			found_first = false;
+			for (int x = diff.cols - 2; x > 0; --x) {
+				val_now = diff.at<double>(y, x);
+				if (search && (
+					((val_now <= 0) && positive) || ((val_now >= 0) && !positive))) {// found crossed point
+					if (abs(val_now) < abs(val_prev)) {
+						cross_inv.at<uchar>(y, x) = 255;
+					}
+					else {
+						cross_inv.at<uchar>(y, x + 1) = 255;
+					}
+					positive = !positive;
+					search = false;
+				}
+				if (!search && abs(val_now) > thresh) {
+					search = true;
+					if (!found_first) {
+						found_first = true;
+						positive = (val_now > 0);
+					}
+				}
+				val_prev = val_now;
+			}
+		}
 
-		//cv::Mat cross_x;
-		cv::Sobel(cross, cross, CV_8U, 1, 0, 3, 1, 0, cv::BORDER_REFLECT); //soble_x
+		////cv::Mat cross_morph;
+		////cv::Mat element1 = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(9, 9));
+		////cv::morphologyEx(cross, cross_morph, cv::MORPH_BLACKHAT, element1, cv::Point(-1, -1), 3);
+		////cv::Mat cross_morph_;
+		////cv::Mat element2 = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
+		////cv::morphologyEx(cross_morph, cross_morph_, cv::MORPH_CLOSE, element2);
+
+		////cross = cross - cross_morph_;
+		////cv::threshold(cross, cross, 0, 255, cv::THRESH_BINARY);
+
+		//////cv::Mat cross_x;
+		////cv::Sobel(cross, cross, CV_8U, 1, 0, 3, 1, 0, cv::BORDER_REFLECT); //soble_x
 		//cv::bitwise_and(cross, cross_x, cross);
 		//cv::Mat crossNorm;
 		//crossNorm = cross / 255;
