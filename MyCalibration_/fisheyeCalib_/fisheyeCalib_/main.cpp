@@ -18,7 +18,7 @@
 #include <valarray>
 //#include <pthread.h>
 int main(int argc, const char * argv[])
-{
+{/*
 	//single fisheye camera calibration
 	fisheyeCalibInfo calibInfoL, calibInfoR;
 	calibInfoL.calibPatternFile = "./20191017-1-2/patternsL.xml";
@@ -29,7 +29,7 @@ int main(int argc, const char * argv[])
 	calibInfoR.calibPatternFile = "./20191017-1-2/patternsR.xml";
 	calibInfoR.calibLineDetected = "./20191017-1-2/linesDetectedR.xml";
 	calibInfoR.calibFile = "./20191017-1-2/resCalibR.xml";
-	fisheyeCalib_(calibInfoR);
+	fisheyeCalib_(calibInfoR);*/
 
 	//stereo calibration based on unditort images
 	//std::string imgPath = "C:\\Users\\lenovo\\Web\\CaptureFiles\\2019-07-23";
@@ -62,7 +62,7 @@ int main(int argc, const char * argv[])
 	infoCalib.stereoCalib_rectify_mapxR = "./20191017-1-2/rectify_mapxR.xml";
 	infoCalib.stereoCalib_rectify_mapyR = "./20191017-1-2/rectify_mapyR.xml";
 
-	rectify_(infoCalib);
+	//rectify_(infoCalib);
 
 
 	cv::Mat mapxL, mapyL, mapxR, mapyR;
@@ -79,6 +79,10 @@ int main(int argc, const char * argv[])
 	fn["StereoCalib_R"] >> matrixR;
 	fn["StereoCalib_T"] >> matrixT;
 	fn.release();
+
+	cv::FileStorage fn_1(infoCalib.stereoCalib_undistort_mapxL, cv::FileStorage::READ);
+	fn_1["Fisheye_Undistort_Map_mapxL"] >> mapxL;
+	fn_1.release();
 
 	cv::FileStorage fn_2(infoCalib.stereoCalib_undistort_mapyL, cv::FileStorage::READ);
 	fn_2["Fisheye_Undistort_Map_mapyL"] >> mapyL;
