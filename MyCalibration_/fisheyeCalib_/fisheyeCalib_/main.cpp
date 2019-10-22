@@ -19,6 +19,7 @@
 //#include <pthread.h>
 int main(int argc, const char * argv[])
 {
+	/*
 	//single fisheye camera calibration
 	fisheyeCalibInfo calibInfoL, calibInfoR;
 	calibInfoL.calibPatternFile = "./20191017-1/patternsL.xml"; //"patternsL.xml";
@@ -29,7 +30,7 @@ int main(int argc, const char * argv[])
 	calibInfoR.calibPatternFile = "./20191017-1/patternsR.xml";
 	calibInfoR.calibLineDetected = "./20191017-1/linesDetectedR.xml";
 	calibInfoR.calibFile = "./20191017-1/resCalibR.xml";
-	fisheyeCalib_(calibInfoR);
+	fisheyeCalib_(calibInfoR);*/
 
 	//stereo calibration based on unditort images
 	//std::string imgPath = "C:\\Users\\lenovo\\Web\\CaptureFiles\\2019-07-23";
@@ -45,22 +46,22 @@ int main(int argc, const char * argv[])
 	****************************************/
 
 	calibInfo infoCalib;
-	infoCalib.calibFileL = "resCalibL.xml";
-	infoCalib.calibFileR = "resCalibR.xml";
+	infoCalib.calibFileL = "./20191017-1/resCalibL.xml";
+	infoCalib.calibFileR = "./20191017-1/resCalibR.xml";
 	infoCalib.calibChessImgPathL = "D:\\studying\\stereo vision\\research code\\data\\2019-07-23\\left";
 	infoCalib.calibChessImgPathR = "D:\\studying\\stereo vision\\research code\\data\\2019-07-23\\right";
 	infoCalib.chessRowNum = 6;
 	infoCalib.chessColNum = 9;
-	infoCalib.stereoCalib = "unditortStereoCalib.xml";
-	infoCalib.stereoCalib_undistort_mapxL = "undistort_mapxL.xml";
-	infoCalib.stereoCalib_undistort_mapyL = "undistort_mapyL.xml";
-	infoCalib.stereoCalib_undistort_mapxR = "undistort_mapxR.xml";
-	infoCalib.stereoCalib_undistort_mapyR = "undistort_mapyR.xml";
+	infoCalib.stereoCalib = "./20191017-1/unditortStereoCalib.xml";
+	infoCalib.stereoCalib_undistort_mapxL = "./20191017-1/undistort_mapxL.xml";
+	infoCalib.stereoCalib_undistort_mapyL = "./20191017-1/undistort_mapyL.xml";
+	infoCalib.stereoCalib_undistort_mapxR = "./20191017-1/undistort_mapxR.xml";
+	infoCalib.stereoCalib_undistort_mapyR = "./20191017-1/undistort_mapyR.xml";
 
-	infoCalib.stereoCalib_rectify_mapxL = "rectify_mapxL.xml";
-	infoCalib.stereoCalib_rectify_mapyL = "rectify_mapyL.xml";
-	infoCalib.stereoCalib_rectify_mapxR = "rectify_mapxR.xml";
-	infoCalib.stereoCalib_rectify_mapyR = "rectify_mapyR.xml";
+	infoCalib.stereoCalib_rectify_mapxL = "./20191017-1/rectify_mapxL.xml";
+	infoCalib.stereoCalib_rectify_mapyL = "./20191017-1/rectify_mapyL.xml";
+	infoCalib.stereoCalib_rectify_mapxR = "./20191017-1/rectify_mapxR.xml";
+	infoCalib.stereoCalib_rectify_mapyR = "./20191017-1/rectify_mapyR.xml";
 
 	rectify_(infoCalib);
 

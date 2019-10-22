@@ -28,6 +28,7 @@ void Pair::calcMd()
         for(auto &line : edge[i]) {	
             for (auto &point : line) {
                 point->calcDerivatives();
+				//IncidentVector_calcDerivatives(point);
             }
         }
     }
@@ -208,10 +209,10 @@ void Pair::calcLc()
 
 void pair_calcDerivatives(Pair& obj)
 {	
-	std::thread th1(std::bind(&Pair::calcMd, &obj));
+	obj.calcMd();
+
 	std::thread th2(std::bind(&Pair::calcMc, &obj));
 	std::thread th3(std::bind(&Pair::calcMcc, &obj));
-	th1.join();
 	th2.join();
 	th3.join();
 

@@ -9,7 +9,7 @@
 #include "Reprojection.h"
 
 
-void Reprojection::loadPrameters(std::string filename)
+void Reprojection::loadParameters(std::string filename)
 {
     cv::FileStorage fs(filename, cv::FileStorage::READ);
     
@@ -27,7 +27,7 @@ void Reprojection::loadPrameters(std::string filename)
     fs["f0"] >> f0;
     fs["center"] >> center;
     fs["img_size"] >> img_size;
-	fs["px_size"] >> px_size;
+	fs["pixel_size"] >> px_size;
     fs["projection"] >> projection;
     
     a.clear();
@@ -40,7 +40,6 @@ void Reprojection::loadPrameters(std::string filename)
     IncidentVector::setProjection(projection);
     IncidentVector::setParameters(f, f0, a, img_size, center, px_size);
 }
-
 
 void Reprojection::theta2radius()
 {

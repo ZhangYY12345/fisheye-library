@@ -34,6 +34,7 @@ protected:
     static int projection; //Projection Model：成像模型，所选用投影模型的标识
     cv::Point3d part;	//点坐标关于theta求导结果
 
+public:
     void calcCommonPart(); // Calculate common part of derivatives
     virtual cv::Point3d calcDu() = 0;	//依据不同的成像模型，分别实现函数
     virtual cv::Point3d calcDv() = 0;
@@ -42,14 +43,6 @@ protected:
     virtual cv::Point3d calcDf() = 0;
     virtual std::vector<cv::Point3d> calcDak() = 0;
 
-	virtual void calcDu(cv::Point3d& res) = 0;	//依据不同的成像模型，分别实现函数
-	virtual void calcDv(cv::Point3d& res) = 0;
-	virtual void calcDpx(cv::Point3d& res) = 0;
-	virtual void calcDpy(cv::Point3d& res) = 0;
-	virtual void calcDf(cv::Point3d& res) = 0;
-	virtual void calcDak(std::vector<cv::Point3d>& res) = 0;
-
-public:
     cv::Point3d m;
     cv::Point2d point;		//图像物理坐标
     std::vector<cv::Point3d> derivatives;
@@ -109,7 +102,5 @@ public:
     void calcM();
     virtual double aoi(double r) = 0; // Calculate theta
 };
-
-
 
 #endif

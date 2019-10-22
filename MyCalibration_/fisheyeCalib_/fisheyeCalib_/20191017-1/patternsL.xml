@@ -2,8 +2,8 @@
 <images>
   <projection>Equidistance</projection>
   <focal_length>1.68</focal_length>
-  <pixel_size_x>7.2338e-7</pixel_size_x>
-  <pixel_size_y>1.7147e-6</pixel_size_y>
+  <pixel_size_x>2.017527139e-3</pixel_size_x>
+  <pixel_size_y>2.017527139e-3</pixel_size_y>
   <width>2560</width>
   <height>1440</height>
   <pair>

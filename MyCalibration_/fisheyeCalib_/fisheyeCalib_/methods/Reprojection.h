@@ -29,7 +29,7 @@ public:
     double rad_step;
     std::string projection;
     
-    void loadPrameters(std::string);
+    void loadParameters(std::string filename);
     void theta2radius();
     void saveTheta2Radius(std::string filename);
     void saveRadius2Theta(std::string filename);

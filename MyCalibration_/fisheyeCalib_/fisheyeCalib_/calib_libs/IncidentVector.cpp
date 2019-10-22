@@ -99,6 +99,7 @@ void IncidentVector::calcDerivatives()
 {
     calcCommonPart();
     derivatives.clear();
+
     derivatives.push_back(calcDu());
     derivatives.push_back(calcDv());
 	derivatives.push_back(calcDpx());

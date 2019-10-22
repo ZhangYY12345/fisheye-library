@@ -22,13 +22,6 @@ private:
     cv::Point3d calcDf();
 	std::vector<cv::Point3d> calcDak();
 
-	void calcDu(cv::Point3d& res);	
-	void calcDv(cv::Point3d& res);
-	void calcDpx(cv::Point3d& res);
-	void calcDpy(cv::Point3d& res);
-	void calcDf(cv::Point3d& res);
-	void calcDak(std::vector<cv::Point3d>& res);
-
 public:
     double aoi(double r); // Calculate theta
     EquidistanceProjection(cv::Point2d p);

@@ -12,6 +12,10 @@ using namespace cv;
 //	return 
 //}
 
+long linesNum;
+long pointsNum;
+int orthogonalPairsNum;
+
 void fisheyeCalib_(fisheyeCalibInfo infoStereoCalib)
 {
 	
@@ -58,8 +62,9 @@ void fisheyeCalib_(fisheyeCalibInfo infoStereoCalib)
 	for (int i = 0; i < IncidentVector::nparam - 5; ++i) {
 		std::cout << "    a" << i << ":\t" << IncidentVector::getA().at(i) << std::endl;
 	}
-
+	orthogonalPairsNum = calib.edges.size();
 	std::cout << "Orthogonal pairs: " << calib.edges.size() << std::endl;
+
 	long lines = 0;
 	long points = 0;
 	for (auto &pair : calib.edges) {
@@ -73,7 +78,8 @@ void fisheyeCalib_(fisheyeCalibInfo infoStereoCalib)
 	}
 	std::cout << "Lines: " << lines << std::endl;
 	std::cout << "Points: " << points << std::endl;
-
+	linesNum = lines;
+	pointsNum = points;
 
 	// Show an image of all edges
 //    cv::Mat img = cv::Mat::zeros(IncidentVector::getImgSize().height, IncidentVector::getImgSize().width, CV_8UC3);
@@ -282,11 +288,12 @@ void rectify_(calibInfo infoStereoCalib)
 		std::string param = infoStereoCalib.calibFileL;
 		//std::cout << "Type parameter file name > ";
 		//std::cin >> param;
-		reproj.loadPrameters(param);
+		reproj.loadParameters(param);
 
 		// Print parameters
 		std::cout << "f: " << IncidentVector::getF() << "\nf0: " << IncidentVector::getF0() << std::endl;
 		std::cout << "center: " << IncidentVector::getCenter() << std::endl;
+		std::cout << "pixel size: " << IncidentVector::getPxSize() << std::endl;
 		std::cout << "image size: " << IncidentVector::getImgSize() << std::endl;
 		std::cout << "ai: ";
 		std::vector<double> a_s = IncidentVector::getA();
@@ -298,7 +305,7 @@ void rectify_(calibInfo infoStereoCalib)
 		reproj.theta2radius();
 		//    reproj.saveRadius2Theta("Stereographic.dat");
 
-		f_ = IncidentVector::getF();
+		f_ = IncidentVector::getF() / IncidentVector::getPxSize().x;
 		reproj.calcMaps(f_, mapxL, mapyL);
 
 		std::string filePathL = infoStereoCalib.calibChessImgPathL;//"D:\\studying\\stereo vision\\research code\\data\\20190719\\camera_jpg_2\\left"
@@ -311,7 +318,7 @@ void rectify_(calibInfo infoStereoCalib)
 		std::string param = infoStereoCalib.calibFileR;// "resCalibR.xml";
 		//std::cout << "Type parameter file name > ";
 		//std::cin >> param;
-		reproj.loadPrameters(param);
+		reproj.loadParameters(param);
 
 		// Print parameters
 		std::cout << "f: " << IncidentVector::getF() << "\nf0: " << IncidentVector::getF0() << std::endl;
@@ -327,7 +334,7 @@ void rectify_(calibInfo infoStereoCalib)
 		reproj.theta2radius();
 		//    reproj.saveRadius2Theta("Stereographic.dat");
 
-		f_ = IncidentVector::getF();
+		f_ = IncidentVector::getF() / IncidentVector::getPxSize().x;
 		reproj.calcMaps(f_, mapxR, mapyR);
 
 		std::string filePathR = infoStereoCalib.calibChessImgPathR;// "D:\\studying\\stereo vision\\research code\\data\\20190719\\camera_jpg_2\\right";

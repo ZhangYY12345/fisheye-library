@@ -8,6 +8,10 @@
 
 #include "Calibration.h"
 
+extern long pointsNum;
+extern long linesNum;
+extern int orthogonalPairsNum;
+
 void Calibration::setParameters(std::vector<Pair>& edges, double& f, double& f0, cv::Point2d& center, cv::Size2i& img_size, cv::Point2d& px_size, int a_size) {
     std::vector<double> a(a_size, 0);
     IncidentVector::setParameters(f, f0, a, img_size, center, px_size);
@@ -25,7 +29,7 @@ void Calibration::loadData(std::string filename) {
     
 	double f = atof(root->FirstChildElement("focal_length")->GetText());
     IncidentVector::setF(f);
-    IncidentVector::setF0((int)f);
+    IncidentVector::setF0((int)f*1e-3);
 
     double unit_x = atof(root->FirstChildElement("pixel_size_x")->GetText());
 	double unit_y = atof(root->FirstChildElement("pixel_size_y")->GetText());
@@ -128,6 +132,7 @@ void Calibration::save(std::string filename)
     cv::FileStorage fs_out(filename, cv::FileStorage::WRITE);
     fs_out << "projection" << IncidentVector::getProjectionName();
     fs_out << "center" << IncidentVector::getCenter();
+	fs_out << "pixel_size" << IncidentVector::getPxSize();
     fs_out << "img_size" << IncidentVector::getImgSize();
     fs_out << "f" << IncidentVector::getF();
     fs_out << "f0" << IncidentVector::getF0();
@@ -160,17 +165,19 @@ void Calibration::calibrate(bool divide)
     if (divide) {
         gamma[0] = j1; gamma[1] = j2; gamma[2] = j3;
     } else {
-        gamma[0]= 0;
-        for (auto &pair : edges) {
-            gamma[0] += pair.edge[0].size() + pair.edge[1].size();
-        }
-        gamma[1] = edges.size();
-        gamma[2] = gamma[1]/2;
-        
+        //gamma[0]= 0;
+        //for (auto &pair : edges) {
+        //    gamma[0] += pair.edge[0].size() + pair.edge[1].size();
+        //}
+        //gamma[1] = edges.size();
+        //gamma[2] = gamma[1]/2;
+		gamma[0] = pointsNum;
+		gamma[1] = linesNum;
+		gamma[2] = orthogonalPairsNum;
         //gamma[0] = gamma[1] = gamma[2] = 1;
     }
     J0 = j1 / gamma[0] + j2 / gamma[1] + j3 / gamma[2];
-    std::cout << "J1  \t" << j1/gamma[0] << "\nJ2  \t" << j2/gamma[1] << "\nJ3  \t" << j3/gamma[2] << std::endl;
+    std::cout << "J1/gamma[0]  \t" << j1/gamma[0] << "\nJ2/gamma[1]  \t" << j2/gamma[1] << "\nJ3/gamma[2]  \t" << j3/gamma[2] << std::endl;
     std::cout << "J1  \t" << j1 << "\nJ2  \t" << j2 << "\nJ3  \t" << j3 << std::endl;
     std::cout << "======================================" << std::endl;
 	//J0 = j2 / gamma[1] + j3 / gamma[2];
@@ -182,7 +189,8 @@ void Calibration::calibrate(bool divide)
     cv::Mat delta_prev= cv::Mat::ones(IncidentVector::nparam, 1, CV_64F);
     while (true) {
         cv::Point2d center = IncidentVector::getCenter();
-        double f = IncidentVector::getF();
+		cv::Point2d px_size = IncidentVector::getPxSize();
+    	double f = IncidentVector::getF();
         std::vector<double> a = IncidentVector::getA();
         
         //    ( 2 ) 式(3) によって入射角θκα を計算し，式(6) によって入射光ベクトルmκα を計算し，
@@ -224,7 +232,7 @@ void Calibration::calibrate(bool divide)
             }
             //    ( 4 ) 次の連立1次方程式を解いてΔu0, Δv0, Δf, Δa1, ... を計算する．
 			//计算Δu0,Δv0,Δf,Δa1, ...：参数移动步长
-			bool solveFlag =  cv::solve(left.mul(cmat), -right, delta);
+			bool solveFlag =  cv::solve(left.mul(cmat), -right, delta, cv::DECOMP_SVD);
             std::cout << solveFlag<<std::endl;
             std::cout << "------------------------ Iteration "<< iterations << " -------------------------" << std::endl;
             std::cout << "Delta: " << delta << std::endl;
@@ -233,16 +241,19 @@ void Calibration::calibrate(bool divide)
             //    ˜u0 = u0+Δu0, ˜v = v0+Δv0, ˜ f = f+Δf, ˜a1 = a1+Δa1, ˜a2 = a2+Δa2, ... (48)
 			//新的参数，基于新的参数计算各约束条件：共线性约束，平行性约束，正交性约束
             cv::Point2d center_(center.x + delta.at<double>(0), center.y + delta.at<double>(1));
-            double f_ = f + delta.at<double>(2);
+			cv::Point2d px_size_(px_size.x + delta.at<double>(2), px_size.y + delta.at<double>(3));
+        	double f_ = f + delta.at<double>(4);
             std::vector<double> a_;
             for (int i = 0; i < a.size(); ++i) {
-                a_.push_back(a[i] + delta.at<double>(i+3));
+                a_.push_back(a[i] + delta.at<double>(i+5));
             }
             
             // Recalculate m and relatives based on new parameters
             IncidentVector::setF(f_);
             IncidentVector::setA(a_);
             IncidentVector::setCenter(center_);
+			IncidentVector::setPxSize(px_size_);
+
 #pragma omp parallel for
             for (auto &pair : edges) {
                 pair.calcM();
@@ -259,7 +270,7 @@ void Calibration::calibrate(bool divide)
             std::cout << "C: " << C << "\tJ0: " << J0 << "\tJ_: " << J_;
             std::cout.precision(10);
             std::cout.width(10);
-            std::cout << "\tJ1_: " << j1/gamma[0] << "\tJ2_: " << j2/gamma[1] << "\tJ3_: " << j3/gamma[2] << std::endl;
+            std::cout << "\tJ1_/gamma[0]: " << j1/gamma[0] << "\tJ2_/gamma[1]: " << j2/gamma[1] << "\tJ3_/gamma[2]: " << j3/gamma[2] << std::endl;
             std::cout << "J1_: " << j1 << "\tJ2_: " << j2 << "\tJ3_: " << j3 << std::endl;
 			//std::cout << "\tJ2_: " << j2 / gamma[1] << "\tJ3_: " << j3 / gamma[2] << std::endl;
 			//std::cout << "\tJ2_: " << j2 << "\tJ3_: " << j3 << std::endl;
@@ -269,9 +280,10 @@ void Calibration::calibrate(bool divide)
 			//J < J0的话前进下一步; 否则作为C := 10*C 返回步骤(4)
             if ( J_  <= J0) {
                 std::cout << "Center:\t" << center_ << std::endl;
-                std::cout << "     f:\t" << f_ << std::endl;
+				std::cout << "\tPixel size:\t" << px_size_ << std::endl;
+                std::cout << "\t f:\t" << f_ << std::endl;
                 for (int i = 0; i < a_.size(); ++i) {
-                    std::cout << "    a" << i << ":\t" << a_[i] << std::endl;
+                    std::cout << "\t a" << i << ":\t" << a_[i] << std::endl;
                 }
 
                 break;
@@ -288,14 +300,16 @@ void Calibration::calibrate(bool divide)
         //    る．そうでなければJ0 Ã J, C Ã C/10 としてステップ(2) に戻る
 		//若满足迭代终止条件，返回并退出；否则，。。。返回到步骤(2)，继续迭代
         bool converged = true;
-        double epsilon = 1.0e-5;
+        double epsilon = 1.0e-10;
         if (delta.at<double>(0) / center.x > epsilon ||
             delta.at<double>(1) / center.y > epsilon ||
-            delta.at<double>(2) / f > epsilon) {
+			delta.at<double>(2) / px_size.x > epsilon ||
+			delta.at<double>(3) / px_size.y > epsilon ||
+            delta.at<double>(4) / f > epsilon) {
             converged = false;
         }
-        for (int i = 3; i < IncidentVector::nparam && converged; ++i) {
-            if (fabs(delta.at<double>(i)) /  a.at(i-3) > epsilon) {
+        for (int i = 5; i < IncidentVector::nparam && converged; ++i) {
+            if (fabs(delta.at<double>(i)) /  a.at(i-5) > epsilon) {
                 converged = false;
             }
         }

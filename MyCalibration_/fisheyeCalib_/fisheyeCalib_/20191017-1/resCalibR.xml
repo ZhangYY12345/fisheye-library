@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<opencv_storage>
+<projection>Equidistance</projection>
+<center>
+  1280. 720.</center>
+<pixel_size>
+  2.0175271390000002e-03 2.0175271390000002e-03</pixel_size>
+<img_size>
+  2560 1440</img_size>
+<f>1.6799999999999999e+00</f>
+<f0>1.0000000000000000e-03</f0>
+<a>
+  1.4951983991542534e-49 1.0493664781047360e-42 6.2214274045107231e-36
+  1.0468888213690283e-28 1.4259794348264073e-35</a>
+</opencv_storage>
