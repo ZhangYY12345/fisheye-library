@@ -23,7 +23,7 @@
 
 class Reprojection {
 public:
-    int precision = 100;
+    int precision = 100; //?
     std::vector<double> t2r; // theta to radius
     std::vector<double> r2t;
     double rad_step;

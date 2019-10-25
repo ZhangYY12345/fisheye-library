@@ -55,8 +55,8 @@ void Reprojection::theta2radius()
         max_r += pow(IncidentVector::getCenter().y, 2);
     }
     max_r = sqrt(max_r);
-    max_r = 2000;
-    int theta_size = round(max_r) * precision + 10; // If PRECISION = 10, r = {0, 0.1, 0.2, 0.3, ...}
+    //max_r = 2000;
+    int theta_size = (round(max_r) + 1) * precision; // If PRECISION = 10, r = {0, 0.1, 0.2, 0.3, ...}，查找表中距离r的离散取值的个数，每个距离r对应一个入射角
     
     r2t.resize(theta_size);
     cv::Point2d p(0,0);
@@ -83,19 +83,19 @@ void Reprojection::theta2radius()
     for (int i = 0; i < theta_size; ++i) {
         double r = (double)i / precision;
         
-        r2t[i] = iv->aoi(r);
+        r2t[i] = iv->aoi(r);//计算theta角，此处用到畸变公式
     }
     
-    int r_size = max_r * precision + 10;
+    int r_size = (max_r + 1) * precision; //查找表中距离r的离散取值的个数，每个距离r对应一个唯一的入射角
 //    r_size = 2000 * precision;
     t2r.resize(r_size);
     int j = 1; // j/PRECISION: radius
-    rad_step = r2t[theta_size-1] / r_size; // 0 ~ theta[end] radian
-    rad_step = 2.35 / r_size;
+    rad_step = r2t[theta_size-1] / r_size; // 0 ~ theta[end] radian  ：r2t[theta_size-1]对应最大的入射角；rad_step:入射角离散取值的间隔
+    //rad_step = 2.35 / r_size;
     for (int i = 0; i < r_size; ++i) {
-        double rad = rad_step * i;
-        for (; j < theta_size; ++j) {
-            if (r2t[j] > rad) {
+        double rad = rad_step * i; //入射角取值为rad时，对应点在一圆上
+        for (; j < theta_size; ++j) { //对不同的距离r
+            if (r2t[j] > rad) { //当距离j对应的入射角r2t[j]第一次大于rad时
                 t2r[i] = ((i*rad_step - r2t[j-1]) / (r2t[j]-r2t[j-1]) + j-1) / precision; // See my note on 2014/6/6
                 break;
             }

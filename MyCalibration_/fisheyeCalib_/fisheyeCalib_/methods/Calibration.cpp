@@ -250,7 +250,7 @@ void Calibration::calibrate(bool divide)
             J_ =  j1 / gamma[0] + j2 / gamma[1] + j3 / gamma[2];
 			//J_ = j2 / gamma[1] + j3 / gamma[2];
             std::cout << "C: " << C << "\tJ0: " << J0 << "\tJ_: " << J_;
-            std::cout.precision(10);
+            std::cout.precision(10); //设定输出值以新的浮点数精度显示，即小数点后保留10位
             std::cout.width(10);
             std::cout << "\tJ1_: " << j1/gamma[0] << "\tJ2_: " << j2/gamma[1] << "\tJ3_: " << j3/gamma[2] << std::endl;
             std::cout << "J1_: " << j1 << "\tJ2_: " << j2 << "\tJ3_: " << j3 << std::endl;
