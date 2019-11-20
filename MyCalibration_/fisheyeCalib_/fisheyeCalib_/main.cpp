@@ -21,19 +21,19 @@ int main(int argc, const char * argv[])
 {/*
 	//single fisheye camera calibration
 	fisheyeCalibInfo calibInfoL, calibInfoR;
-	calibInfoL.calibPatternFile = "./20191017-1-2/patternsL.xml";
-	calibInfoL.calibLineDetected = "./20191017-1-2/linesDetectedL.xml";
-	calibInfoL.calibFile = "./20191017-1-2/resCalibL.xml";
+	calibInfoL.calibPatternFile = "./20191119/patternsL.xml";
+	calibInfoL.calibLineDetected = "./20191119/linesDetectedL.xml";
+	calibInfoL.calibFile = "./20191119/resCalibL.xml";
 	fisheyeCalib_(calibInfoL);
 
-	calibInfoR.calibPatternFile = "./20191017-1-2/patternsR.xml";
-	calibInfoR.calibLineDetected = "./20191017-1-2/linesDetectedR.xml";
-	calibInfoR.calibFile = "./20191017-1-2/resCalibR.xml";
-	fisheyeCalib_(calibInfoR);*/
-
+	calibInfoR.calibPatternFile = "./20191119/patternsR.xml";
+	calibInfoR.calibLineDetected = "./20191119/linesDetectedR.xml";
+	calibInfoR.calibFile = "./20191119/resCalibR.xml";
+	fisheyeCalib_(calibInfoR);
+	*/
 	//stereo calibration based on unditort images
 	//std::string imgPath = "C:\\Users\\lenovo\\Web\\CaptureFiles\\2019-07-23";
-	std::string imgPath = "D:\\studying\\stereo vision\\research code\\data\\20190723-3";
+ 	std::string imgPath = "D:\\studying\\stereo vision\\research code\\data\\20191119";
 
 	//load all the images in the folder
 	cv::String filePath = imgPath + "\\*L.jpg";
@@ -45,24 +45,24 @@ int main(int argc, const char * argv[])
 	****************************************/
 
 	calibInfo infoCalib;
-	infoCalib.calibFileL = "./20191017-1-2/resCalibL.xml";
-	infoCalib.calibFileR = "./20191017-1-2/resCalibR.xml";
+	infoCalib.calibFileL = "./20191119/resCalibL.xml";
+	infoCalib.calibFileR = "./20191119/resCalibR.xml";
 	infoCalib.calibChessImgPathL = "D:\\studying\\stereo vision\\research code\\data\\2019-07-23\\left";
 	infoCalib.calibChessImgPathR = "D:\\studying\\stereo vision\\research code\\data\\2019-07-23\\right";
 	infoCalib.chessRowNum = 6;
 	infoCalib.chessColNum = 9;
-	infoCalib.stereoCalib = "./20191017-1-2/unditortStereoCalib.xml";
-	infoCalib.stereoCalib_undistort_mapxL = "./20191017-1-2/undistort_mapxL.xml";
-	infoCalib.stereoCalib_undistort_mapyL = "./20191017-1-2/undistort_mapyL.xml";
-	infoCalib.stereoCalib_undistort_mapxR = "./20191017-1-2/undistort_mapxR.xml";
-	infoCalib.stereoCalib_undistort_mapyR = "./20191017-1-2/undistort_mapyR.xml";
+	infoCalib.stereoCalib = "./20191119/unditortStereoCalib.xml";
+	infoCalib.stereoCalib_undistort_mapxL = "./20191119/undistort_mapxL.xml";
+	infoCalib.stereoCalib_undistort_mapyL = "./20191119/undistort_mapyL.xml";
+	infoCalib.stereoCalib_undistort_mapxR = "./20191119/undistort_mapxR.xml";
+	infoCalib.stereoCalib_undistort_mapyR = "./20191119/undistort_mapyR.xml";
 
-	infoCalib.stereoCalib_rectify_mapxL = "./20191017-1-2/rectify_mapxL.xml";
-	infoCalib.stereoCalib_rectify_mapyL = "./20191017-1-2/rectify_mapyL.xml";
-	infoCalib.stereoCalib_rectify_mapxR = "./20191017-1-2/rectify_mapxR.xml";
-	infoCalib.stereoCalib_rectify_mapyR = "./20191017-1-2/rectify_mapyR.xml";
+	infoCalib.stereoCalib_rectify_mapxL = "./20191119/rectify_mapxL.xml";
+	infoCalib.stereoCalib_rectify_mapyL = "./20191119/rectify_mapyL.xml";
+	infoCalib.stereoCalib_rectify_mapxR = "./20191119/rectify_mapxR.xml";
+	infoCalib.stereoCalib_rectify_mapyR = "./20191119/rectify_mapyR.xml";
 
-	//rectify_(infoCalib);
+	rectify_(infoCalib);
 
 
 	cv::Mat mapxL, mapyL, mapxR, mapyR;

@@ -558,7 +558,7 @@ std::vector<std::vector<cv::Point2i> > LineDetection::detectLines(cv::Mat &img1,
     cv::Mat diff = img1-img2;
     cv::Mat cross = cv::Mat::zeros(diff.rows, diff.cols, CV_8UC1);
     cv::Mat cross_inv = cv::Mat::zeros(diff.rows, diff.cols, CV_8UC1);
-	double thresh = 185;
+	double thresh = 100;//185 for 20191017
     bool positive; // Whether previous found cross point was positive
     bool search; // Whether serching
     bool found_first;
@@ -753,8 +753,13 @@ std::vector<std::vector<cv::Point2i> > LineDetection::detectLines(cv::Mat &img1,
 		//cross = cross.mul(mask);
 		//cv::threshold(cross, cross, 0, 255, cv::THRESH_BINARY);
 	}
+	cv::Mat dst_cross;
+	cv::bitwise_and(cross, cross_inv, dst_cross);
+
     lines = extractEdges(cross);
-    
+
+	cv::bitwise_not(cross, cross);
+ 	cv::imwrite("edge.jpg", cross);
     // Remove noise
     int min = (img_size.width > img_size.height) ? img_size.height/4 : img_size.width/4;
     for (int i = 0; i < lines.size(); ++i) {

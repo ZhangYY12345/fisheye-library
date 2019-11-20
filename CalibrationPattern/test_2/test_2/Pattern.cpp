@@ -61,6 +61,16 @@ void Pattern::generate()
     cv::blur(patterns[2], patterns[2], cv::Size2i(1,slope+1));
     cv::blur(patterns[3], patterns[3], cv::Size2i(1,slope+1));
 
+	cv::Mat squarePattern;
+	cv::bitwise_and(patterns[0], patterns[2], squarePattern);
+	cv::imwrite("1.jpg", squarePattern);
+	cv::bitwise_and(patterns[0], patterns[3], squarePattern);
+	cv::imwrite("2.jpg", squarePattern);
+	cv::bitwise_and(patterns[1], patterns[2], squarePattern);
+	cv::imwrite("3.jpg", squarePattern);
+	cv::bitwise_and(patterns[1], patterns[3], squarePattern);
+	cv::imwrite("4.jpg", squarePattern);
+
 }
 
 void Pattern::save(std::string dir)
