@@ -46,7 +46,7 @@ public:
     cv::Point3d m;
     cv::Point2d point;		//图像物理坐标
     std::vector<cv::Point3d> derivatives;
-    static int nparam; // Number of parameters (u0, v0, f, a1, a2, ...),相机内参
+    static int nparam; // Number of parameters (u0, v0, f, dx, dy, a1, a2, ...),相机内参
     
     IncidentVector(cv::Point2d p);
     

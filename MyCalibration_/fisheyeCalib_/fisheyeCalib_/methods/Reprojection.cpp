@@ -198,3 +198,35 @@ void Reprojection::calcMaps(double f_, cv::Mat& mapx, cv::Mat& mapy)
 		}
 	}
 }
+
+void Reprojection::calcMaps2(double f_, double dx, double dy, cv::Mat& mapx, cv::Mat& mapy)
+{
+	mapx.create(IncidentVector::getImgSize().height, IncidentVector::getImgSize().width, CV_32FC1);
+	mapy.create(IncidentVector::getImgSize().height, IncidentVector::getImgSize().width, CV_32FC1);
+
+	for (int y_ = 0; y_ < IncidentVector::getImgSize().height; ++y_) { // y
+		for (int x_ = 0; x_ < IncidentVector::getImgSize().width; ++x_) { // x
+
+			cv::Point2d p2((x_ - IncidentVector::getImgSize().width / 2.0) * dx, (y_ - IncidentVector::getImgSize().height / 2.0) * dy);
+			cv::Mat p3 = (cv::Mat_<double>(3, 1) << p2.x, p2.y, f_);
+			cv::Mat real = 1.0 / sqrt(pow(p2.x, 2) + pow(p2.y, 2) + pow(f_, 2))  * p3;
+
+			double x = real.at<double>(0, 0);
+			double y = real.at<double>(1, 0);
+			double z = real.at<double>(2, 0);
+			double theta = atan2(sqrt(1 - pow(z, 2)), z);
+			if (t2r.size() <= (int)(theta / rad_step)) {
+				mapx.at<float>(y_, x_) = 0;
+				mapy.at<float>(y_, x_) = 0;
+				continue;
+			}
+			cv::Point2d final = IncidentVector::getCenter() + t2r[(int)(theta / rad_step)] / sqrt(1 - pow(z, 2)) * cv::Point2d(x/dx, y/dy);
+			//            cv::Point2d final = center + f * theta / sqrt(1-pow(z,2))  * cv::Point2d(x,y); // Perspective projection
+			//            cv::Point2d final = center + 2*f*tan(theta/2) / sqrt(1-pow(z,2))  * cv::Point2d(x,y); // Stereo graphic projection
+
+			mapx.at<float>(y_, x_) = final.x;
+			mapy.at<float>(y_, x_) = final.y;
+		}
+	}
+
+}

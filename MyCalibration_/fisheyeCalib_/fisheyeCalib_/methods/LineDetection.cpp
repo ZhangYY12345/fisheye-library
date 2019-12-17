@@ -430,14 +430,14 @@ void LineDetection::processAllImages()
 				//removeNoiseLine(edges[0], false);
 				//removeNoisePts(edges[0], img[0].size(), false);
                 //edges[0] = detectValley(img[0], img[1]);
-                display(cv::Size2i(img[0].cols, img[0].rows), edges[0], "edges");
+                //display(cv::Size2i(img[0].cols, img[0].rows), edges[0], "edges");
                 //edges[1] = detectValley(img[2], img[3]);
 				std::cout << edges[0].size() << std::endl;
                 edges[1] = detectLines(img[2], img[3], true);
 				std::cout << edges[1].size() << std::endl;
 				//removeNoiseLine(edges[1], true);
 				//removeNoisePts(edges[1], img[2].size(), true);
-                display(cv::Size2i(img[2].cols, img[2].rows), edges[1], "edges");
+                //display(cv::Size2i(img[2].cols, img[2].rows), edges[1], "edges");
                 break;
                 
             case Two:
@@ -635,36 +635,6 @@ std::vector<std::vector<cv::Point2i> > LineDetection::detectLines(cv::Mat &img1,
 				val_prev = val_now;
 			}
 		}
-
-		////cv::Mat cross_morph;
-		////cv::Mat element1 = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(9, 9));
-		////cv::morphologyEx(cross, cross_morph, cv::MORPH_BLACKHAT, element1, cv::Point(-1, -1), 3);
-		////cv::Mat cross_morph_;
-		////cv::Mat element2 = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
-		////cv::morphologyEx(cross_morph, cross_morph_, cv::MORPH_CLOSE, element2);
-
-		////cross = cross - cross_morph_;
-		////cv::threshold(cross, cross, 0, 255, cv::THRESH_BINARY);
-
-		//////cv::Mat cross_y;
-		////cv::Sobel(cross, cross, CV_8U, 0, 1, 3, 1, 0, cv::BORDER_REFLECT); //soble_y
-		//cv::bitwise_and(cross, cross_y, cross);
-		//cv::Mat crossNorm;
-		//crossNorm = cross / 255;
-
-		////cv::Mat cross_y;
-		////cv::reduce(crossNorm, cross_y, 1, cv::REDUCE_SUM, CV_32F);
-		////cv::threshold(cross_y, cross_y, 5, 1, cv::THRESH_BINARY);
-
-		//cv::Mat cross_x;
-		//cv::reduce(crossNorm, cross_x, 0, cv::REDUCE_SUM, CV_32F);
-		//cv::threshold(cross_x, cross_x, 50, 1, cv::THRESH_BINARY_INV);
-
-		////cv::Mat mask = cross_y * cross_x ;
-		//cv::Mat mask;
-		//cv::repeat(cross_x, img1.rows, 1, mask);
-		//mask.convertTo(mask, CV_8UC1);
-		//cross = cross.mul(mask);
 	}
 	else
 	{
@@ -728,38 +698,23 @@ std::vector<std::vector<cv::Point2i> > LineDetection::detectLines(cv::Mat &img1,
 			}
 		}
 
-		////cv::Mat cross_morph;
-		////cv::Mat element1 = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(9, 9));
-		////cv::morphologyEx(cross, cross_morph, cv::MORPH_BLACKHAT, element1, cv::Point(-1, -1), 3);
-		////cv::Mat cross_morph_;
-		////cv::Mat element2 = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
-		////cv::morphologyEx(cross_morph, cross_morph_, cv::MORPH_CLOSE, element2);
-
-		////cross = cross - cross_morph_;
-		////cv::threshold(cross, cross, 0, 255, cv::THRESH_BINARY);
-
-		//////cv::Mat cross_x;
-		////cv::Sobel(cross, cross, CV_8U, 1, 0, 3, 1, 0, cv::BORDER_REFLECT); //soble_x
-		//cv::bitwise_and(cross, cross_x, cross);
-		//cv::Mat crossNorm;
-		//crossNorm = cross / 255;
-
-		////cv::Mat cross_x;
-		////cv::reduce(crossNorm, cross_x, 0, cv::REDUCE_SUM, CV_32F);
-		////cv::threshold(cross_x, cross_x, 5, 1, cv::THRESH_BINARY);
-
-		//cv::Mat cross_y;
-		//cv::reduce(crossNorm, cross_y, 1, cv::REDUCE_SUM, CV_32F);
-		//cv::threshold(cross_y, cross_y, 50, 1, cv::THRESH_BINARY_INV);
-
-		////cv::Mat mask = cross_y * cross_x;
-		//cv::Mat mask;
-		//cv::repeat(cross_y, 1, img1.cols, mask);
-		//mask.convertTo(mask, CV_8UC1);
-		//cross = cross.mul(mask);
-		//cv::threshold(cross, cross, 0, 255, cv::THRESH_BINARY);
 	}
-    lines = extractEdges(cross);
+
+	cv::Mat maskImg;
+	createMask_lines_LEFT(maskImg);
+	//createMask_lines_RIGHT(maskImg);
+
+	cv::Mat dst_;
+	cv::bitwise_and(cross, cross_inv, dst_);
+	
+	if(!maskImg.empty())
+	{
+		cv::bitwise_and(dst_, maskImg, dst_);
+	}
+
+	connectEdge(dst_, 5, isHorizon);
+
+	lines = extractEdges(dst_);
     
     // Remove noise
     int min = (img_size.width > img_size.height) ? img_size.height/4 : img_size.width/4;
@@ -771,6 +726,299 @@ std::vector<std::vector<cv::Point2i> > LineDetection::detectLines(cv::Mat &img1,
     }
 
     return lines;
+}
+
+void LineDetection::createMask_lines_LEFT(cv::Mat& dst)
+{
+	std::vector<std::vector<cv::Point2i> > contours;
+	{
+		std::vector<cv::Point2i> oneContour;
+
+		cv::Point2i p1(2559, 0);
+		cv::Point2i p2(2061, 0);
+		cv::Point2i p3(2070, 12);
+		cv::Point2i p4(2086, 31);
+		cv::Point2i p5(2116, 61);
+		cv::Point2i p6(2141, 88);
+		cv::Point2i p7(2179, 130);
+		cv::Point2i p8(2246, 217);
+		cv::Point2i p9(2314, 324);
+		cv::Point2i p10(2329, 345);
+		cv::Point2i p11(2346, 362);
+		cv::Point2i p12(2397, 391);
+		cv::Point2i p13(2425, 499);
+		cv::Point2i p14(2418, 510);
+		cv::Point2i p15(2424, 577);
+		cv::Point2i p16(2414, 599);
+		cv::Point2i p17(2400, 666);
+		cv::Point2i p18(2399, 712);
+		cv::Point2i p19(2400, 742);
+		cv::Point2i p20(2401, 768);
+		cv::Point2i p21(2402, 779);
+		cv::Point2i p22(2404, 800);
+		cv::Point2i p23(2407, 815);
+		cv::Point2i p24(2409, 834);
+		cv::Point2i p25(2416, 862);
+		cv::Point2i p26(2425, 885);
+		cv::Point2i p27(2425, 891);
+		cv::Point2i p28(2418, 935);
+		cv::Point2i p29(2424, 962);
+		cv::Point2i p30(2403, 1050);
+		cv::Point2i p31(2302, 1303);
+		cv::Point2i p32(2221, 1439);
+		cv::Point2i p33(2559, 1439);
+
+		oneContour.push_back(p1);
+		oneContour.push_back(p2);
+		oneContour.push_back(p3);
+		oneContour.push_back(p4);
+		oneContour.push_back(p5);
+		oneContour.push_back(p6);
+		oneContour.push_back(p7);
+		oneContour.push_back(p8);
+		oneContour.push_back(p9);
+		oneContour.push_back(p10);
+		oneContour.push_back(p11);
+		oneContour.push_back(p12);
+		oneContour.push_back(p13);
+		oneContour.push_back(p14);
+		oneContour.push_back(p15);
+		oneContour.push_back(p16);
+		oneContour.push_back(p17);
+		oneContour.push_back(p18);
+		oneContour.push_back(p19);
+		oneContour.push_back(p20);
+		oneContour.push_back(p21);
+		oneContour.push_back(p22);
+		oneContour.push_back(p23);
+		oneContour.push_back(p24);
+		oneContour.push_back(p25);
+		oneContour.push_back(p26);
+		oneContour.push_back(p27);
+		oneContour.push_back(p28);
+		oneContour.push_back(p29);
+		oneContour.push_back(p30);
+		oneContour.push_back(p31);
+		oneContour.push_back(p32);
+		oneContour.push_back(p33);
+
+		contours.push_back(oneContour);
+	}
+	//
+	{
+		std::vector<cv::Point2i> oneContour;
+
+		cv::Point2i p1(0, 0);
+		cv::Point2i p2(357, 0);
+		cv::Point2i p3(274, 116);
+		cv::Point2i p4(241, 179);
+		cv::Point2i p5(191, 284);
+		cv::Point2i p6(158, 372);
+		cv::Point2i p7(130, 480);
+		cv::Point2i p8(113, 590);
+		cv::Point2i p9(107, 685);
+		cv::Point2i p10(110, 801);
+		cv::Point2i p11(122, 903);
+		cv::Point2i p12(149, 1024);
+		cv::Point2i p13(188, 1129);
+		cv::Point2i p14(285, 1356);
+		cv::Point2i p15(350, 1439);
+		cv::Point2i p16(0, 1439);
+
+		oneContour.push_back(p1);
+		oneContour.push_back(p2);
+		oneContour.push_back(p3);
+		oneContour.push_back(p4);
+		oneContour.push_back(p5);
+		oneContour.push_back(p6);
+		oneContour.push_back(p7);
+		oneContour.push_back(p8);
+		oneContour.push_back(p9);
+		oneContour.push_back(p10);
+		oneContour.push_back(p11);
+		oneContour.push_back(p12);
+		oneContour.push_back(p13);
+		oneContour.push_back(p14);
+		oneContour.push_back(p15);
+		oneContour.push_back(p16);
+
+		contours.push_back(oneContour);
+	}
+
+	int width = 2560;
+	int height = 1440;
+	cv::Mat img = cv::Mat::zeros(height, width, CV_8UC1);
+
+	drawContours(img, contours, -1, 255, cv::FILLED);
+	//imwrite("img_.jpg", img);
+	bitwise_not(img, dst);
+}
+
+void LineDetection::createMask_lines_RIGHT(cv::Mat& dst)
+{
+}
+
+void LineDetection::connectEdge(cv::Mat& src, int winSize_thres, bool isHorizon)
+{
+	int width = src.cols;
+	int height = src.rows;
+
+	int half_winsize_thres = winSize_thres;
+
+	if (isHorizon)
+	{
+		for (int y = 2; y < height - 2; y++)
+		{
+			for (int x = 2; x < width - 2; x++)
+			{
+				//如果该中心点为255,则考虑它的八邻域
+				if (src.at<uchar>(y, x) == 255)
+				{
+					if (src.at<uchar>(y - 1, x) == 255 || src.at<uchar>(y + 1, x) == 255)
+					{
+						continue;
+					}
+					//检查8邻域
+					int num_8 = 0;
+					int offset_x1[2] = { -1, 1 };
+					//
+					int starty = 1;
+					for (int offset_y1 = -starty; offset_y1 <= starty; offset_y1++)
+					{
+						if (src.at<uchar>(y + offset_y1, x + offset_x1[0]) == 255)
+							num_8++;
+					}
+					while (num_8 == 0 && starty < half_winsize_thres)
+					{
+						offset_x1[0]--;
+						starty++;
+						for (int offset_y1 = -starty; offset_y1 <= starty; offset_y1++)
+						{
+							if (!(y + offset_y1 >= 0 && y + offset_y1 < height && x + offset_x1[0] >= 0 && x + offset_x1[0] < width))
+							{
+								continue;
+							}
+							if (src.at<uchar>(y + offset_y1, x + offset_x1[0]) == 255)
+							{
+								src.at<uchar>(y + offset_y1 / 2, x + offset_x1[0] / 2) = 255;
+								if (offset_y1 / 2 <= 0 && offset_x1[0] / 2 <= 0 && starty > 2)
+								{
+									x = x + offset_x1[0] / 2 - 1;
+									y = y + offset_y1 / 2 - 1;
+								}
+								num_8++;
+								break;
+							}
+						}
+					}
+					//
+					starty = 1;
+					num_8 = 0;
+					for (int offset_y1 = -starty; offset_y1 <= starty; offset_y1++)
+					{
+						if (src.at<uchar>(y + offset_y1, x + offset_x1[1]) == 255)
+							num_8++;
+					}
+					while (num_8 == 0 && starty < half_winsize_thres)
+					{
+						offset_x1[1]++;
+						starty++;
+						for (int offset_y1 = -starty; offset_y1 <= starty; offset_y1++)
+						{
+							if (!(y + offset_y1 >= 0 && y + offset_y1 < height && x + offset_x1[1] >= 0 && x + offset_x1[1] < width))
+							{
+								continue;
+							}
+							if (src.at<uchar>(y + offset_y1, x + offset_x1[1]) == 255)
+							{
+								src.at<uchar>(y + offset_y1 / 2, x + offset_x1[1] / 2) = 255;
+								num_8++;
+								break;
+							}
+						}
+					}
+				}
+			}
+		}
+
+	}
+	else
+	{
+		for (int y = 2; y < height - 2; y++)
+		{
+			for (int x = 2; x < width - 2; x++)
+			{
+				//如果该中心点为255,则考虑它的八邻域
+				if (src.at<uchar>(y, x) == 255)
+				{
+					if (src.at<uchar>(y, x - 1) == 255 || src.at<uchar>(y, x + 1) == 255)
+					{
+						continue;
+					}
+
+					//检查8邻域
+					int num_8 = 0;
+					int offset_y1[2] = { -1, 1 };
+					//
+					int startx = 1;
+					for (int offset_x1 = -startx; offset_x1 <= startx; offset_x1++)
+					{
+						if (src.at<uchar>(y + offset_y1[0], x + offset_x1) == 255)
+							num_8++;
+					}
+					while (num_8 == 0 && startx < half_winsize_thres)
+					{
+						offset_y1[0]--;
+						startx++;
+						for (int offset_x1 = -startx; offset_x1 <= startx; offset_x1++)
+						{
+							if (!(y + offset_y1[0] >= 0 && y + offset_y1[0] < height && x + offset_x1 >= 0 && x + offset_x1 < width))
+							{
+								continue;
+							}
+							if (src.at<uchar>(y + offset_y1[0], x + offset_x1) == 255)
+							{
+								src.at<uchar>(y + offset_y1[0] / 2, x + offset_x1 / 2) = 255;
+								if (offset_x1 / 2 <= 0 && offset_y1[0] / 2 <= 0 && startx > 2)
+								{
+									x = x + offset_x1 / 2 - 1;
+									y = y + offset_y1[0] / 2 - 1;
+								}
+								num_8++;
+								break;
+							}
+						}
+					}
+					//
+					startx = 1;
+					num_8 = 0;
+					for (int offset_x1 = -startx; offset_x1 <= startx; offset_x1++)
+					{
+						if (src.at<uchar>(y + offset_y1[1], x + offset_x1) == 255)
+							num_8++;
+					}
+					while (num_8 == 0 && startx < half_winsize_thres)
+					{
+						offset_y1[1]++;
+						startx++;
+						for (int offset_x1 = -startx; offset_x1 <= startx; offset_x1++)
+						{
+							if (!(y + offset_y1[1] >= 0 && y + offset_y1[1] < height && x + offset_x1 >= 0 && x + offset_x1 < width))
+							{
+								continue;
+							}
+							if (src.at<uchar>(y + offset_y1[1], x + offset_x1) == 255)
+							{
+								src.at<uchar>(y + offset_y1[1] / 2, x + offset_x1 / 2) = 255;
+								num_8++;
+								break;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
 void LineDetection::removeNoisePts(std::vector<std::vector<cv::Point2i> >& lines, cv::Size imgSize, bool isHorizon)

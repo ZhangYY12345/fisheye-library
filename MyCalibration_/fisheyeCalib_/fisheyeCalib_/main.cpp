@@ -19,18 +19,18 @@
 //#include <pthread.h>
 int main(int argc, const char * argv[])
 {
-	/*
+	
 	//single fisheye camera calibration
 	fisheyeCalibInfo calibInfoL, calibInfoR;
 	calibInfoL.calibPatternFile = "./20191017-1/patternsL.xml"; //"patternsL.xml";
 	calibInfoL.calibLineDetected = "./20191017-1/linesDetectedL.xml";
 	calibInfoL.calibFile = "./20191017-1/resCalibL.xml";
-	fisheyeCalib_(calibInfoL);
+	//fisheyeCalib_(calibInfoL);
 
 	calibInfoR.calibPatternFile = "./20191017-1/patternsR.xml";
 	calibInfoR.calibLineDetected = "./20191017-1/linesDetectedR.xml";
 	calibInfoR.calibFile = "./20191017-1/resCalibR.xml";
-	fisheyeCalib_(calibInfoR);*/
+	fisheyeCalib_(calibInfoR);
 
 	//stereo calibration based on unditort images
 	//std::string imgPath = "C:\\Users\\lenovo\\Web\\CaptureFiles\\2019-07-23";

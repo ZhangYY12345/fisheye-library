@@ -39,7 +39,7 @@ cv::Point3d StereographicProjection::calcDu()
         for (int i = 0; i < a.size(); ++i) {
             tu += (2*i+3) * a[i] * pow(r/f0, 2*i+2);
         }
-        tu *= - pow(cos(theta/2), 2) * (point.x-center.x) * px_size.x * px_size.x / (r * f);
+        tu *= - pow(cos(theta/2.0), 2) * (point.x-center.x) * px_size.x * px_size.x / (r * f);
         mu += part * tu;
         return mu;
         
@@ -60,7 +60,7 @@ cv::Point3d StereographicProjection::calcDv()
         for (int i = 0; i < a.size(); ++i) {
             tv += (2*i+3) * a[i] * pow(r/f0, 2*i+2);
         }
-        tv *= - pow(cos(theta/2), 2) * (point.y-center.y) * px_size.y * px_size.y / (r * f);
+        tv *= - pow(cos(theta/2.0), 2) * (point.y-center.y) * px_size.y * px_size.y / (r * f);
         mv += part * tv;
         return mv;
         
@@ -103,7 +103,7 @@ cv::Point3d StereographicProjection::calcDpy()
 		for (int i = 0; i < a.size(); ++i) {
 			tpy += (2 * i + 3) * a[i] * pow(r / f0, 2 * i + 2);
 		}
-		tpy *= pow(cos(theta / 2), 2) * pow(point.y - center.y, 2) * px_size.y / (r * f);
+		tpy *= pow(cos(theta / 2.0), 2) * pow(point.y - center.y, 2) * px_size.y / (r * f);
 		mpy += part * tpy;
 		return mpy;
 
@@ -119,7 +119,7 @@ cv::Point3d StereographicProjection::calcDf()
     cv::Point3d mf;
     
     if (r != 0) {
-        mf = part * (-sin(theta) / f);
+        mf = part * (- 1.0 / f * sin(theta));
         return mf;
     } else {
         return cv::Point3d(0, 0, 0);
@@ -131,7 +131,7 @@ std::vector<cv::Point3d> StereographicProjection::calcDak()
     std::vector<cv::Point3d> ms;
     if (r != 0) {
         cv::Point3d m;
-        m = part * (cos(theta/2) * f0 / f);
+        m = part * (cos(theta / 2.0) * cos(theta / 2.0) *f0 / f);
         for(int i=0; i<a.size(); ++i) {
             ms.push_back(pow(r/f0, 2*i+3) * m);
         }

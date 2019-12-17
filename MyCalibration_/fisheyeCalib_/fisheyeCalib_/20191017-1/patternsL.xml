@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <images>
-  <projection>Equidistance</projection>
+  <projection>Stereographic</projection>
   <focal_length>1.68</focal_length>
   <pixel_size_x>2.017527139e-3</pixel_size_x>
   <pixel_size_y>2.017527139e-3</pixel_size_y>

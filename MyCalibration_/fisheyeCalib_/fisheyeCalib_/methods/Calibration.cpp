@@ -29,11 +29,11 @@ void Calibration::loadData(std::string filename) {
     
 	double f = atof(root->FirstChildElement("focal_length")->GetText());
     IncidentVector::setF(f);
-    IncidentVector::setF0((int)f*1e-3);
 
     double unit_x = atof(root->FirstChildElement("pixel_size_x")->GetText());
 	double unit_y = atof(root->FirstChildElement("pixel_size_y")->GetText());
 	IncidentVector::setPxSize(cv::Point2d(unit_x, unit_y));
+    IncidentVector::setF0((int)(f / unit_x));
 
     cv::Size2i img_size;
     cv::Point2d center;
@@ -171,10 +171,10 @@ void Calibration::calibrate(bool divide)
         //}
         //gamma[1] = edges.size();
         //gamma[2] = gamma[1]/2;
-		gamma[0] = pointsNum;
-		gamma[1] = linesNum;
-		gamma[2] = orthogonalPairsNum;
-        //gamma[0] = gamma[1] = gamma[2] = 1;
+		//gamma[0] = pointsNum;
+		//gamma[1] = linesNum;
+		//gamma[2] = orthogonalPairsNum;
+        gamma[0] = gamma[1] = gamma[2] = 1;
     }
     J0 = j1 / gamma[0] + j2 / gamma[1] + j3 / gamma[2];
     std::cout << "J1/gamma[0]  \t" << j1/gamma[0] << "\nJ2/gamma[1]  \t" << j2/gamma[1] << "\nJ3/gamma[2]  \t" << j3/gamma[2] << std::endl;
@@ -300,7 +300,7 @@ void Calibration::calibrate(bool divide)
         //    る．そうでなければJ0 Ã J, C Ã C/10 としてステップ(2) に戻る
 		//若满足迭代终止条件，返回并退出；否则，。。。返回到步骤(2)，继续迭代
         bool converged = true;
-        double epsilon = 1.0e-10;
+        double epsilon = 1.0e-50;
         if (delta.at<double>(0) / center.x > epsilon ||
             delta.at<double>(1) / center.y > epsilon ||
 			delta.at<double>(2) / px_size.x > epsilon ||

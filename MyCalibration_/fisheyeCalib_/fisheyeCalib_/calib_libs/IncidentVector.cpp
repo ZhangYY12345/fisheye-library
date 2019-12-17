@@ -86,8 +86,8 @@ void IncidentVector::calcM()
 void IncidentVector::calcCommonPart()
 {
     if (r != 0) {
-        part.x = (point.x - center.x) * px_size.x /r * cos(theta);
-        part.y = (point.y - center.y) * px_size.y /r * cos(theta);
+        part.x = ((point.x - center.x) * px_size.x / r) * cos(theta);
+        part.y = ((point.y - center.y) * px_size.y / r) * cos(theta);
         part.z = -sin(theta);
     } else {
         part.x = part.y = part.z = 0;

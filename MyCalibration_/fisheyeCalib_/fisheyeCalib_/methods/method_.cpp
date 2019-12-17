@@ -21,7 +21,7 @@ void fisheyeCalib_(fisheyeCalibInfo infoStereoCalib)
 	
 	/****************************************
 	***detect lines in calibration images
-	****************************************//*
+	****************************************/
 	std::string fname = infoStereoCalib.calibPatternFile;	// "D:\\studying\\stereo vision\\research code\\fisheye-stereo-calibrate\\fisheye-library\\MyCalibration_\\fisheyeCalib_\\fisheyeCalib_\\patternsL.xml";
 	LineDetection ld;
 	//    ld.editAllEdges(ld.loadEdgeXML(fname));
@@ -35,7 +35,7 @@ void fisheyeCalib_(fisheyeCalibInfo infoStereoCalib)
 	ld.processAllImages();
 	//
 	std::string output = infoStereoCalib.calibLineDetected;
-	ld.writeXML(output);*/
+	ld.writeXML(output);
 
 
 	/****************************************
@@ -120,7 +120,7 @@ void fisheyeCalib_(fisheyeCalibInfo infoStereoCalib)
 //    IncidentVector::initA(1);
 //    calib.calibrate(false);
 	IncidentVector::initA(a_size);
-	calib.calibrate(false);
+	calib.calibrate(true);
 	//calib.calibrate(true);
 		//calib.calibrate2();
 
@@ -305,10 +305,13 @@ void rectify_(calibInfo infoStereoCalib)
 		reproj.theta2radius();
 		//    reproj.saveRadius2Theta("Stereographic.dat");
 
-		f_ = IncidentVector::getF() / IncidentVector::getPxSize().x;
-		reproj.calcMaps(f_, mapxL, mapyL);
+		f_ = IncidentVector::getF();
+		double dx = IncidentVector::getPxSize().x;
+		double dy = IncidentVector::getPxSize().y;
 
-		std::string filePathL = infoStereoCalib.calibChessImgPathL;//"D:\\studying\\stereo vision\\research code\\data\\20190719\\camera_jpg_2\\left"
+		reproj.calcMaps2(f_, dx, dy, mapxL, mapyL);
+
+		std::string filePathL = "D:/studying/stereo vision/research code/data/20191017-2/left";//infoStereoCalib.calibChessImgPathL;//"D:\\studying\\stereo vision\\research code\\data\\20190719\\camera_jpg_2\\left"
 		fisheyeUndistort_(filePathL, IncidentVector::getImgSize(), mapxL, mapyL, imgUndistortL);
 	}
 	{

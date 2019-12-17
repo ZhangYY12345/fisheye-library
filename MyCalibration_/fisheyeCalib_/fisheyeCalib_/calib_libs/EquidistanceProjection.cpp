@@ -36,7 +36,7 @@ cv::Point3d EquidistanceProjection::calcDu()
 {
     if (r != 0) {
         cv::Point3d mu;
-        mu.x = (-1/r + pow((point.x-center.x) * px_size.x, 2) / pow(r, 3)) * px_size.x;
+        mu.x = (-1.0/r + pow((point.x-center.x) * px_size.x, 2) / pow(r, 3)) * px_size.x;
         mu.y = (point.x-center.x) * (point.y-center.y) * pow(px_size.x, 2) * px_size.y / pow(r, 3);
         mu.z = 0;
         mu *= sin(theta);
@@ -123,7 +123,7 @@ cv::Point3d EquidistanceProjection::calcDf()
     cv::Point3d mf;
     
     if (r != 0) {
-        mf = part * (-1/f * theta);
+        mf = part * (-1.0/f * theta);
         return mf;
     } else {
         return cv::Point3d(0, 0, 0);
