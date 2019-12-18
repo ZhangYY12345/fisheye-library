@@ -19,19 +19,19 @@
 //#include <pthread.h>
 int main(int argc, const char * argv[])
 {
-	
+	/*
 	//single fisheye camera calibration
 	fisheyeCalibInfo calibInfoL, calibInfoR;
 	calibInfoL.calibPatternFile = "./20191017-1/patternsL.xml"; //"patternsL.xml";
 	calibInfoL.calibLineDetected = "./20191017-1/linesDetectedL.xml";
 	calibInfoL.calibFile = "./20191017-1/resCalibL.xml";
-	//fisheyeCalib_(calibInfoL);
+	fisheyeCalib_(calibInfoL);
 
 	calibInfoR.calibPatternFile = "./20191017-1/patternsR.xml";
 	calibInfoR.calibLineDetected = "./20191017-1/linesDetectedR.xml";
 	calibInfoR.calibFile = "./20191017-1/resCalibR.xml";
 	fisheyeCalib_(calibInfoR);
-
+*/
 	//stereo calibration based on unditort images
 	//std::string imgPath = "C:\\Users\\lenovo\\Web\\CaptureFiles\\2019-07-23";
 	std::string imgPath = "D:\\studying\\stereo vision\\research code\\data\\20190723-3";
@@ -46,12 +46,12 @@ int main(int argc, const char * argv[])
 	****************************************/
 
 	calibInfo infoCalib;
-	infoCalib.calibFileL = "./20191017-1/resCalibL.xml";
+	infoCalib.calibFileL = "D:/studying/stereo vision/research code/fisheye-stereo-calibrate/fisheyeStereoCalib/fisheyeStereoCalib/fisheyeStereoCalib/20191211/patternsImgL/基于几何不变量的标定结果/resCalibL_equalSolid.xml";//"./20191017-1/resCalibL.xml";
 	infoCalib.calibFileR = "./20191017-1/resCalibR.xml";
 	infoCalib.calibChessImgPathL = "D:\\studying\\stereo vision\\research code\\data\\2019-07-23\\left";
 	infoCalib.calibChessImgPathR = "D:\\studying\\stereo vision\\research code\\data\\2019-07-23\\right";
-	infoCalib.chessRowNum = 6;
-	infoCalib.chessColNum = 9;
+	infoCalib.chessRowNum = 17;
+	infoCalib.chessColNum = 31;
 	infoCalib.stereoCalib = "./20191017-1/unditortStereoCalib.xml";
 	infoCalib.stereoCalib_undistort_mapxL = "./20191017-1/undistort_mapxL.xml";
 	infoCalib.stereoCalib_undistort_mapyL = "./20191017-1/undistort_mapyL.xml";

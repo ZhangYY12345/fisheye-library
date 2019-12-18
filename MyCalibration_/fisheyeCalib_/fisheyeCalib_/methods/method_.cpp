@@ -120,7 +120,7 @@ void fisheyeCalib_(fisheyeCalibInfo infoStereoCalib)
 //    IncidentVector::initA(1);
 //    calib.calibrate(false);
 	IncidentVector::initA(a_size);
-	calib.calibrate(true);
+	calib.calibrate(false);
 	//calib.calibrate(true);
 		//calib.calibrate2();
 
@@ -311,7 +311,7 @@ void rectify_(calibInfo infoStereoCalib)
 
 		reproj.calcMaps2(f_, dx, dy, mapxL, mapyL);
 
-		std::string filePathL = "D:/studying/stereo vision/research code/data/20191017-2/left";//infoStereoCalib.calibChessImgPathL;//"D:\\studying\\stereo vision\\research code\\data\\20190719\\camera_jpg_2\\left"
+		std::string filePathL = "D:/studying/stereo vision/research code/fisheye-stereo-calibrate/fisheyeStereoCalib/fisheyeStereoCalib/fisheyeStereoCalib/20191211/patternsImgL/rectify_test";//infoStereoCalib.calibChessImgPathL;//"D:\\studying\\stereo vision\\research code\\data\\20190719\\camera_jpg_2\\left"
 		fisheyeUndistort_(filePathL, IncidentVector::getImgSize(), mapxL, mapyL, imgUndistortL);
 	}
 	{
